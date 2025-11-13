@@ -23,6 +23,9 @@ class DatabaseSeeder extends Seeder
             RosterSeeder::class,
             AppointmentSeeder::class,
             PrescriptionSeeder::class,
+            DailyTaskSeeder::class,
+            PaymentSeeder::class,
+            ReportSeeder::class,
         ]);
     }
 
