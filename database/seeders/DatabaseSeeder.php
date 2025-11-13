@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             CaregiverSeeder::class,
             FamilyMemberSeeder::class,
             RosterSeeder::class,
+            AppointmentSeeder::class,
+            PrescriptionSeeder::class,
         ]);
     }
 
