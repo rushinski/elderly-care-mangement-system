@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserSeeder::class,
             PatientSeeder::class,
+            SupervisorSeeder::class,
+            DoctorSeeder::class,
+            CaregiverSeeder::class,
         ]);
     }
 
