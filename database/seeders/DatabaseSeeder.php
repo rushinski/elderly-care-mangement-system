@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             SupervisorSeeder::class,
             DoctorSeeder::class,
             CaregiverSeeder::class,
+            FamilyMemberSeeder::class,
+            RosterSeeder::class,
         ]);
     }
 
