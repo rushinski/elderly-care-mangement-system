@@ -9,6 +9,7 @@ use App\Http\Controllers\CaregiverController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\UserApplicationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,12 +45,20 @@ Route::middleware(['auth', 'role:Admin'])->group(function () {
     Route::put('/admin/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/admin/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::get('/admin/payments/summary', [PaymentController::class, 'summary'])->name('payments.summary');
+    Route::get('/applications', [UserApplicationController::class, 'index'])->name('applications.index');
+    Route::get('/applications/{application}', [UserApplicationController::class, 'show'])->name('applications.show');
+    Route::post('/applications/{application}/approve', [UserApplicationController::class, 'approve'])->name('applications.approve');
+    Route::post('/applications/{application}/reject', [UserApplicationController::class, 'reject'])->name('applications.reject');
 });
 
 Route::middleware(['auth', 'role:Supervisor'])->group(function () {
     Route::get('/supervisor/dashboard', [SupervisorController::class, 'index'])->name('supervisor.dashboard');
     Route::resource('/supervisor/rosters', SupervisorController::class)->except(['index']);
     Route::post('/supervisor/reports/{report}/review', [SupervisorController::class, 'reviewReport'])->name('supervisor.reviewReport');
+    Route::get('/applications', [UserApplicationController::class, 'index'])->name('applications.index');
+    Route::get('/applications/{application}', [UserApplicationController::class, 'show'])->name('applications.show');
+    Route::post('/applications/{application}/approve', [UserApplicationController::class, 'approve'])->name('applications.approve');
+    Route::post('/applications/{application}/reject', [UserApplicationController::class, 'reject'])->name('applications.reject');
 });
 
 Route::middleware(['auth', 'role:Doctor'])->group(function () {
