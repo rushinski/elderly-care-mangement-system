@@ -15,8 +15,13 @@ class CaregiverController extends Controller
     public function index()
     {
         $userId = auth()->id();
-        $assignedPatients = Roster::where('user_id', $userId)->with('patient')->get();
-        $tasks = DailyTask::where('caregiver_id', $userId)->latest()->get();
+        $assignedPatients = Roster::where('user_id', $userId)
+            ->with('patient')
+            ->get();
+
+        $tasks = DailyTask::where('caregiver_id', $userId)
+            ->latest()
+            ->get();
 
         return view('caregiver.dashboard', compact('assignedPatients', 'tasks'));
     }
@@ -48,26 +53,38 @@ class CaregiverController extends Controller
             'status' => $validated['status'] ?? 'pending',
         ]);
 
-        return redirect()->route('caregiver.index')->with('success', 'Daily task created successfully.');
+        return redirect()
+            ->route('caregiver.dashboard')
+            ->with('success', 'Daily task created successfully.');
+    }
+
+    /**
+     * Display a specific daily task (tasks.show).
+     */
+    public function show(DailyTask $task)
+    {
+        $this->authorizeTask($task);
+
+        return view('caregiver.view-task', compact('task'));
     }
 
     /**
      * Edit a daily task.
      */
-    public function edit(DailyTask $dailyTask)
+    public function edit(DailyTask $task)
     {
-        $this->authorizeTask($dailyTask);
+        $this->authorizeTask($task);
         $patients = Patient::all();
 
-        return view('caregiver.edit-task', compact('dailyTask', 'patients'));
+        return view('caregiver.edit-task', compact('task', 'patients'));
     }
 
     /**
      * Update an existing daily task.
      */
-    public function update(Request $request, DailyTask $dailyTask)
+    public function update(Request $request, DailyTask $task)
     {
-        $this->authorizeTask($dailyTask);
+        $this->authorizeTask($task);
 
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
@@ -75,28 +92,33 @@ class CaregiverController extends Controller
             'status' => 'required|string|in:pending,completed',
         ]);
 
-        $dailyTask->update($validated);
+        $task->update($validated);
 
-        return redirect()->route('caregiver.index')->with('success', 'Daily task updated successfully.');
+        return redirect()
+            ->route('caregiver.dashboard')
+            ->with('success', 'Daily task updated successfully.');
     }
 
     /**
      * Delete a daily task.
      */
-    public function destroy(DailyTask $dailyTask)
+    public function destroy(DailyTask $task)
     {
-        $this->authorizeTask($dailyTask);
+        $this->authorizeTask($task);
 
-        $dailyTask->delete();
-        return redirect()->route('caregiver.index')->with('success', 'Task deleted successfully.');
+        $task->delete();
+
+        return redirect()
+            ->route('caregiver.dashboard')
+            ->with('success', 'Task deleted successfully.');
     }
 
     /**
      * Verify task ownership for security.
      */
-    private function authorizeTask(DailyTask $dailyTask)
+    private function authorizeTask(DailyTask $task)
     {
-        if ($dailyTask->caregiver_id !== auth()->id()) {
+        if ($task->caregiver_id !== auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
     }

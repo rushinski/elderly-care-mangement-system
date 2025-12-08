@@ -43,7 +43,17 @@ class DoctorController extends Controller
 
         Appointment::create($validated);
 
-        return redirect()->route('doctor.index')->with('success', 'Appointment created successfully.');
+        return redirect()
+            ->route('doctor.dashboard')
+            ->with('success', 'Appointment created successfully.');
+    }
+
+    /**
+     * Show a specific appointment (appointments.show).
+     */
+    public function show(Appointment $appointment)
+    {
+        return view('doctor.view-appointment', compact('appointment'));
     }
 
     /**
@@ -69,7 +79,9 @@ class DoctorController extends Controller
 
         $appointment->update($validated);
 
-        return redirect()->route('doctor.index')->with('success', 'Appointment updated successfully.');
+        return redirect()
+            ->route('doctor.dashboard')
+            ->with('success', 'Appointment updated successfully.');
     }
 
     /**
@@ -78,7 +90,10 @@ class DoctorController extends Controller
     public function destroy(Appointment $appointment)
     {
         $appointment->delete();
-        return redirect()->route('doctor.index')->with('success', 'Appointment deleted successfully.');
+
+        return redirect()
+            ->route('doctor.dashboard')
+            ->with('success', 'Appointment deleted successfully.');
     }
 
     /**
@@ -103,6 +118,8 @@ class DoctorController extends Controller
 
         Prescription::create($validated);
 
-        return redirect()->route('doctor.index')->with('success', 'Prescription added successfully.');
+        return redirect()
+            ->route('doctor.dashboard')
+            ->with('success', 'Prescription added successfully.');
     }
 }

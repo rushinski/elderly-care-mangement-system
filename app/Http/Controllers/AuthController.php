@@ -35,13 +35,13 @@ class AuthController extends Controller
 
             // Redirect based on role
             return match ($role) {
-                'Admin' => redirect('/admin/dashboard'),
+                'Admin'      => redirect('/admin/dashboard'),
                 'Supervisor' => redirect('/supervisor/dashboard'),
-                'Doctor' => redirect('/doctor/dashboard'),
-                'Caregiver' => redirect('/caregiver/dashboard'),
-                'Patient' => redirect('/patient/home'),
-                'Family' => redirect('/family/home'),
-                default => redirect('/'),
+                'Doctor'     => redirect('/doctor/dashboard'),
+                'Caregiver'  => redirect('/caregiver/dashboard'),
+                'Patient'    => redirect('/patient/home'),
+                'Family'     => redirect('/family/home'),
+                default      => redirect('/'),
             };
         }
 
@@ -80,7 +80,18 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('dashboard')->with('success', 'Account created successfully.');
+        $role = $user->role->name ?? null;
+
+        // Same role-based redirect logic as login()
+        return match ($role) {
+            'Admin'      => redirect('/admin/dashboard'),
+            'Supervisor' => redirect('/supervisor/dashboard'),
+            'Doctor'     => redirect('/doctor/dashboard'),
+            'Caregiver'  => redirect('/caregiver/dashboard'),
+            'Patient'    => redirect('/patient/home'),
+            'Family'     => redirect('/family/home'),
+            default      => redirect('/'),
+        };
     }
 
     /**

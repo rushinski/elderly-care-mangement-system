@@ -50,7 +50,17 @@ class AdminController extends Controller
             'role_id' => $validated['role_id'],
         ]);
 
-        return redirect()->route('admin.index')->with('success', 'User created successfully.');
+        return redirect()
+            ->route('admin.dashboard')
+            ->with('success', 'User created successfully.');
+    }
+
+    /**
+     * Show a specific user (for users.show route).
+     */
+    public function show(User $user)
+    {
+        return view('admin.show-user', compact('user'));
     }
 
     /**
@@ -75,7 +85,9 @@ class AdminController extends Controller
 
         $user->update($validated);
 
-        return redirect()->route('admin.index')->with('success', 'User updated successfully.');
+        return redirect()
+            ->route('admin.dashboard')
+            ->with('success', 'User updated successfully.');
     }
 
     /**
@@ -84,7 +96,10 @@ class AdminController extends Controller
     public function destroy(User $user)
     {
         $user->delete();
-        return redirect()->route('admin.index')->with('success', 'User deleted successfully.');
+
+        return redirect()
+            ->route('admin.dashboard')
+            ->with('success', 'User deleted successfully.');
     }
 
     /**
@@ -98,6 +113,10 @@ class AdminController extends Controller
 
     /**
      * View payment summaries.
+     *
+     * NOTE: This method is not wired to any route in your current route:list.
+     * Payments are handled by PaymentController via payments.* routes.
+     * You can safely remove this if unused.
      */
     public function payments()
     {

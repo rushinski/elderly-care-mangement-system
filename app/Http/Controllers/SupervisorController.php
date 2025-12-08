@@ -45,7 +45,17 @@ class SupervisorController extends Controller
 
         Roster::create($validated);
 
-        return redirect()->route('supervisor.index')->with('success', 'Roster created successfully.');
+        return redirect()
+            ->route('supervisor.dashboard')
+            ->with('success', 'Roster created successfully.');
+    }
+
+    /**
+     * Show a specific roster entry (rosters.show).
+     */
+    public function show(Roster $roster)
+    {
+        return view('supervisor.view-roster', compact('roster'));
     }
 
     /**
@@ -73,7 +83,9 @@ class SupervisorController extends Controller
 
         $roster->update($validated);
 
-        return redirect()->route('supervisor.index')->with('success', 'Roster updated successfully.');
+        return redirect()
+            ->route('supervisor.dashboard')
+            ->with('success', 'Roster updated successfully.');
     }
 
     /**
@@ -83,7 +95,9 @@ class SupervisorController extends Controller
     {
         $roster->delete();
 
-        return redirect()->route('supervisor.index')->with('success', 'Roster entry deleted successfully.');
+        return redirect()
+            ->route('supervisor.dashboard')
+            ->with('success', 'Roster entry deleted successfully.');
     }
 
     /**
@@ -97,6 +111,8 @@ class SupervisorController extends Controller
 
         $report->update($validated);
 
-        return redirect()->route('supervisor.index')->with('success', 'Report status updated.');
+        return redirect()
+            ->route('supervisor.dashboard')
+            ->with('success', 'Report status updated.');
     }
 }
