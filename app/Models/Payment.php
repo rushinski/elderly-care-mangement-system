@@ -21,13 +21,13 @@ class Payment extends Model
         'payment_date',
     ];
 
-    // 🔗 Relationships
+    // Relationships
     public function patient()
     {
         return $this->belongsTo(Patient::class);
     }
 
-    // 💰 Auto-calculate total on save
+    // Auto-calculate total on save
     protected static function booted()
     {
         static::saving(function ($payment) {

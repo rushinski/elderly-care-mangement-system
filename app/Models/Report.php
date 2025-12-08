@@ -19,7 +19,7 @@ class Report extends Model
         'summary',
     ];
 
-    // 🔗 Relationships
+    // Relationships
     public function patient()
     {
         return $this->belongsTo(Patient::class);

@@ -18,7 +18,7 @@ class Appointment extends Model
         'notes',
     ];
 
-    // 🔗 Relationships
+    // Relationships
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);

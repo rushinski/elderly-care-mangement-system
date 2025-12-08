@@ -18,7 +18,7 @@ class Roster extends Model
         'notes',
     ];
 
-    // 🔗 Relationships
+    // Relationships
     public function supervisor()
     {
         return $this->belongsTo(Supervisor::class);

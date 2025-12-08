@@ -18,7 +18,7 @@ class FamilyMember extends Model
         'family_code',
     ];
 
-    // 🔗 Relationships
+    // Relationships
     public function patient()
     {
         return $this->belongsTo(Patient::class);

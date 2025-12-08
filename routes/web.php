@@ -22,7 +22,7 @@ use App\Http\Controllers\PaymentController;
 */
 
 // ========================
-// 🔐 Authentication Routes
+// Authentication Routes
 // ========================
 Route::get('/', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -31,7 +31,7 @@ Route::post('/register', [AuthController::class, 'store'])->name('register.post'
 Route::get('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 // ========================
-// 🧭 Role-Based Dashboards
+// Role-Based Dashboards
 // ========================
 Route::middleware(['auth', 'role:Admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
@@ -78,7 +78,7 @@ Route::middleware(['auth', 'role:Family'])->group(function () {
 });
 
 // ========================
-// 🚀 Default Fallback
+// Default Fallback
 // ========================
 Route::fallback(function () {
     return redirect('/')->withErrors(['route' => 'The page you are looking for does not exist.']);

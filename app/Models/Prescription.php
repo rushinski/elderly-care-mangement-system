@@ -19,7 +19,7 @@ class Prescription extends Model
         'instructions',
     ];
 
-    // 🔗 Relationships
+    // Relationships
     public function appointment()
     {
         return $this->belongsTo(Appointment::class);
