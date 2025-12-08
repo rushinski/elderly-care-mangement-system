@@ -1,8 +1,5 @@
 {{-- resources/views/components/sidebar.blade.php --}}
-<aside
-    class="bg-white border-r w-64 hidden md:flex md:flex-col"
-    :class="{ 'hidden': !sidebarOpen && $screen('md') === false }"
->
+<aside class="bg-white border-r w-56 hidden md:flex md:flex-col">
     <div class="px-4 py-4 border-b">
         <span class="font-bold text-sm">Navigation</span>
     </div>
@@ -16,9 +13,13 @@
                    class="block px-3 py-2 rounded hover:bg-gray-100">
                     Admin Dashboard
                 </a>
+                <a href="{{ route('users.create') }}"
+                   class="block px-3 py-2 rounded hover:bg-gray-100">
+                    Create User
+                </a>
                 <a href="{{ route('admin.reports') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
-                    Missed Activity Reports
+                    Reports
                 </a>
                 <a href="{{ route('payments.index') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
@@ -28,8 +29,6 @@
                    class="block px-3 py-2 rounded hover:bg-gray-100">
                     Payment Summary
                 </a>
-                {{-- User management is accessed via buttons on the dashboard,
-                     because there is no users.index route --}}
             @elseif($role === 'Supervisor')
                 <a href="{{ route('supervisor.dashboard') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
@@ -37,7 +36,7 @@
                 </a>
                 <a href="{{ route('rosters.create') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
-                    New Roster
+                    Create Roster
                 </a>
             @elseif($role === 'Doctor')
                 <a href="{{ route('doctor.dashboard') }}"
@@ -46,17 +45,21 @@
                 </a>
                 <a href="{{ route('appointments.create') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
-                    Schedule Appointment
+                    Create Appointment
                 </a>
             @elseif($role === 'Caregiver')
                 <a href="{{ route('caregiver.dashboard') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
                     Caregiver Dashboard
                 </a>
+                <a href="{{ route('tasks.create') }}"
+                   class="block px-3 py-2 rounded hover:bg-gray-100">
+                    Add Daily Task
+                </a>
             @elseif($role === 'Patient')
                 <a href="{{ route('patient.dashboard') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
-                    My Schedule
+                    My Dashboard
                 </a>
             @elseif($role === 'Family')
                 <a href="{{ route('family.dashboard') }}"

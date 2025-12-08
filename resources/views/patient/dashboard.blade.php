@@ -1,83 +1,74 @@
+{{-- resources/views/patient/dashboard.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'My Schedule')
+@section('title', 'Patient Dashboard')
 
 @section('content')
-<h1 class="text-2xl font-bold mb-4">My Schedule</h1>
+<h1 class="text-2xl font-bold mb-4">My Dashboard</h1>
 
-<x-card title="Today’s Overview">
-    <p class="text-sm text-gray-600 mb-2">
-        Date: {{ ($date ?? now())->format('Y-m-d') }}
-    </p>
-
-    <table class="w-full text-sm">
-        <thead class="border-b">
-        <tr class="text-left">
-            <th class="py-2">Time</th>
-            <th>Type</th>
-            <th>With</th>
-            <th>Notes</th>
-            <th>Done?</th>
-        </tr>
-        </thead>
-        <tbody>
-        @forelse($scheduleItems ?? [] as $item)
-            <tr class="border-b last:border-0">
-                <td class="py-2">{{ $item->time }}</td>
-                <td>{{ $item->type }}</td>
-                <td>{{ $item->with }}</td>
-                <td>{{ $item->notes }}</td>
-                <td>
-                    @if($item->completed)
-                        ✅
-                    @else
-                        ⬜
-                    @endif
-                </td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="5" class="py-3 text-center text-gray-500">
-                    No scheduled items for today.
-                </td>
-            </tr>
-        @endforelse
-        </tbody>
-    </table>
+<x-card title="My Info">
+    <p class="text-sm mb-1"><strong>Name:</strong> {{ $patient->name }}</p>
+    <p class="text-sm mb-1"><strong>ID:</strong> {{ $patient->id }}</p>
+    <p class="text-sm mb-1"><strong>Room:</strong> {{ $patient->room ?? '-' }}</p>
 </x-card>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <x-card title="Doctors">
+    <x-card title="Appointments">
         <ul class="text-sm divide-y">
-            @forelse($doctors ?? [] as $doctor)
-                <li class="py-2">{{ $doctor->name }}</li>
+            @forelse($appointments as $appointment)
+                <li class="py-2 flex items-center justify-between">
+                    <div>
+                        {{ $appointment->date?->format('Y-m-d') }} – {{ $appointment->time }}
+                    </div>
+                    <a href="{{ route('patient.showAppointment', $appointment) }}"
+                       class="text-xs text-blue-600 hover:underline">
+                        View
+                    </a>
+                </li>
             @empty
-                <li class="py-2 text-gray-500">No doctors assigned.</li>
-            @endforelse
-        </ul>
-    </x-card>
-
-    <x-card title="Caregivers">
-        <ul class="text-sm divide-y">
-            @forelse($caregivers ?? [] as $caregiver)
-                <li class="py-2">{{ $caregiver->name }}</li>
-            @empty
-                <li class="py-2 text-gray-500">No caregivers assigned.</li>
+                <li class="py-2 text-gray-500">
+                    No appointments.
+                </li>
             @endforelse
         </ul>
     </x-card>
 
     <x-card title="Prescriptions">
         <ul class="text-sm divide-y">
-            @forelse($prescriptions ?? [] as $prescription)
-                <li class="py-2">
-                    <div class="font-semibold">{{ $prescription->medicine_name }}</div>
-                    <div class="text-xs text-gray-500">
-                        {{ $prescription->dosage }} – {{ $prescription->schedule }}
+            @forelse($prescriptions as $prescription)
+                <li class="py-2 flex items-center justify-between">
+                    <div>
+                        {{ $prescription->medication }} ({{ $prescription->dosage }})
                     </div>
+                    <a href="{{ route('patient.showPrescription', $prescription) }}"
+                       class="text-xs text-blue-600 hover:underline">
+                        View
+                    </a>
                 </li>
             @empty
-                <li class="py-2 text-gray-500">No prescriptions.</li>
+                <li class="py-2 text-gray-500">
+                    No prescriptions.
+                </li>
+            @endforelse
+        </ul>
+    </x-card>
+
+    <x-card title="Payments">
+        <ul class="text-sm divide-y">
+            @forelse($payments as $payment)
+                <li class="py-2 flex items-center justify-between">
+                    <div>
+                        {{ $payment->date?->format('Y-m-d') }} – ${{ number_format($payment->amount, 2) }}
+                    </div>
+                    <a href="{{ route('patient.showPayment', $payment) }}"
+                       class="text-xs text-blue-600 hover:underline">
+                        View
+                    </a>
+                </li>
+            @empty
+                <li class="py-2 text-gray-500">
+                    No payments recorded.
+                </li>
             @endforelse
         </ul>
     </x-card>

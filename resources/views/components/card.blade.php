@@ -1,19 +1,10 @@
 {{-- resources/views/components/card.blade.php --}}
-@props(['title' => null, 'actions' => null])
+@props(['title' => null])
 
 <div class="bg-white shadow-sm rounded-lg p-4 mb-4">
-    @if($title || $actions)
-        <div class="flex items-center justify-between mb-3">
-            @if($title)
-                <h2 class="text-base md:text-lg font-semibold">{{ $title }}</h2>
-            @endif
-            @if($actions)
-                <div>{{ $actions }}</div>
-            @endif
-        </div>
+    @if($title)
+        <h2 class="text-base md:text-lg font-semibold mb-3">{{ $title }}</h2>
     @endif
 
-    <div>
-        {{ $slot }}
-    </div>
+    {{ $slot }}
 </div>
