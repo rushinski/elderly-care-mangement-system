@@ -14,8 +14,9 @@ class SupervisorController extends Controller
      */
     public function index()
     {
-        $rosters = Roster::with('user')->latest()->get();
-        $reports = Report::where('status', 'pending')->latest()->get();
+        $rosters = Roster::with(['user', 'caregiver', 'supervisor'])->latest()->get();
+        $reports = \App\Models\Report::orderBy('created_at', 'desc')->get();
+
 
         return view('supervisor.dashboard', compact('rosters', 'reports'));
     }
@@ -43,12 +44,20 @@ class SupervisorController extends Controller
             'shift' => 'required|string|max:50',
         ]);
 
-        Roster::create($validated);
+        // ✅ Automatically attach the logged-in supervisor
+        Roster::create([
+            'supervisor_id' => auth()->id(),
+            'caregiver_id'  => $validated['user_id'],
+            'date'          => $validated['date'],
+            'shift'         => $validated['shift'],
+            'notes'         => $request->input('notes', null),
+        ]);
 
         return redirect()
             ->route('supervisor.dashboard')
             ->with('success', 'Roster created successfully.');
     }
+
 
     /**
      * Show a specific roster entry (rosters.show).

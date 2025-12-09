@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use App\Models\User;
 use App\Models\UserApplication;
 use App\Models\Role;
 
@@ -15,6 +17,7 @@ class AuthController extends Controller
      */
     public function showLogin()
     {
+        Log::info('AuthController@showLogin → GET /login viewed');
         return view('auth.login');
     }
 
@@ -23,6 +26,10 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        Log::info('AuthController@login → POST /login attempt', [
+            'email' => $request->input('email')
+        ]);
+
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string|min:6',
@@ -31,19 +38,37 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            $role = Auth::user()->role->name ?? null;
+            $user = Auth::user();
+            $role = $user->role->name ?? 'Unknown';
 
-            // Redirect based on role
-            return match ($role) {
-                'Admin'      => redirect('/admin/dashboard'),
-                'Supervisor' => redirect('/supervisor/dashboard'),
-                'Doctor'     => redirect('/doctor/dashboard'),
-                'Caregiver'  => redirect('/caregiver/dashboard'),
-                'Patient'    => redirect('/patient/home'),
-                'Family'     => redirect('/family/home'),
-                default      => redirect('/'),
+            Log::info('✅ Auth success', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'role' => $role,
+            ]);
+
+            $redirectPath = match ($role) {
+                'Admin'      => '/admin/dashboard',
+                'Supervisor' => '/supervisor/dashboard',
+                'Doctor'     => '/doctor/dashboard',
+                'Caregiver'  => '/caregiver/dashboard',
+                'Patient'    => '/patient/home',
+                'Family'     => '/family/home',
+                default      => '/',
             };
+
+            Log::info('🔁 Redirecting user after login', [
+                'email' => $user->email,
+                'to' => $redirectPath
+            ]);
+
+            return redirect($redirectPath);
         }
+
+        Log::warning('❌ Auth failed', [
+            'email' => $request->input('email'),
+            'ip' => $request->ip(),
+        ]);
 
         return back()->withErrors([
             'email' => 'Invalid credentials or account not found.',
@@ -55,6 +80,7 @@ class AuthController extends Controller
      */
     public function showRegister()
     {
+        Log::info('AuthController@showRegister → GET /register viewed');
         $roles = Role::all();
         return view('auth.register', compact('roles'));
     }
@@ -114,10 +140,15 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
+        $user = Auth::user();
+        $email = $user ? $user->email : 'guest';
+        Log::info('🚪 Logout initiated', ['email' => $email]);
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        Log::info('✅ Logout complete', ['email' => $email]);
         return redirect('/')->with('success', 'You have been logged out successfully.');
     }
 }

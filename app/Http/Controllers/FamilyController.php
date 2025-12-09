@@ -15,12 +15,25 @@ class FamilyController extends Controller
      */
     public function index()
     {
-        $userId = auth()->id();
-        $familyMember = FamilyMember::where('user_id', $userId)->firstOrFail();
+        $user = auth()->user();
 
-        $patient = Patient::where('id', $familyMember->patient_id)->first();
-        $appointments = Appointment::where('patient_id', $patient->id)->latest()->get();
-        $prescriptions = Prescription::where('patient_id', $patient->id)->latest()->get();
+        // Match logged-in family user to their family_members record via email
+        $familyMember = FamilyMember::where('email', $user->email)->first();
+
+        if (!$familyMember) {
+            return redirect('/')
+                ->withErrors(['family' => 'No linked family record found for this user.']);
+        }
+
+        $patient = Patient::find($familyMember->patient_id);
+
+        $appointments = Appointment::where('patient_id', $patient->id ?? null)
+            ->latest()
+            ->get();
+
+        $prescriptions = Prescription::where('patient_id', $patient->id ?? null)
+            ->latest()
+            ->get();
 
         return view('family.dashboard', compact('patient', 'appointments', 'prescriptions'));
     }
@@ -44,12 +57,13 @@ class FamilyController extends Controller
     }
 
     /**
-     * Verify access through family-patient link.
+     * Verify access through family-patient email link.
      */
     private function authorizeFamilyAccess($patientId)
     {
-        $userId = auth()->id();
-        $isLinked = FamilyMember::where('user_id', $userId)
+        $user = auth()->user();
+
+        $isLinked = FamilyMember::where('email', $user->email)
             ->where('patient_id', $patientId)
             ->exists();
 

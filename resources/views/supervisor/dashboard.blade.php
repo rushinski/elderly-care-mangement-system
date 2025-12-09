@@ -21,7 +21,7 @@
             @forelse($rosters as $roster)
                 <tr class="border-b last:border-0">
                     <td class="py-2">{{ $roster->user->name ?? 'N/A' }}</td>
-                    <td>{{ $roster->date?->format('Y-m-d') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($roster->date ?? now())->format('Y-m-d') }}</td>
                     <td>{{ $roster->shift }}</td>
                     <td class="text-right">
                         <a href="{{ route('rosters.edit', $roster) }}"
@@ -67,7 +67,7 @@
                 <tr class="border-b last:border-0">
                     <td class="py-2">{{ $report->id }}</td>
                     <td>{{ $report->status }}</td>
-                    <td>{{ $report->created_at?->format('Y-m-d H:i') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($report->created_at ?? now())->format('Y-m-d H:i') }}</td>
                     <td class="text-right">
                         <form method="POST"
                               action="{{ route('supervisor.reviewReport', $report) }}"

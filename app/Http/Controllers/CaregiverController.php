@@ -15,11 +15,12 @@ class CaregiverController extends Controller
     public function index()
     {
         $userId = auth()->id();
-        $assignedPatients = Roster::where('user_id', $userId)
+        $assignedPatients = Roster::where('caregiver_id', $userId)
             ->with('patient')
             ->get();
 
-        $tasks = DailyTask::where('caregiver_id', $userId)
+
+        $tasks = \App\Models\DailyTask::whereIn('roster_id', $assignedPatients->pluck('id'))
             ->latest()
             ->get();
 

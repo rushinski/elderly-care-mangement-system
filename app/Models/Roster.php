@@ -11,31 +11,27 @@ class Roster extends Model
 
     protected $fillable = [
         'supervisor_id',
-        'doctor_id',
         'caregiver_id',
         'date',
         'shift',
-        'notes',
+        'notes'
     ];
 
-    // Relationships
     public function supervisor()
     {
-        return $this->belongsTo(Supervisor::class);
-    }
-
-    public function doctor()
-    {
-        return $this->belongsTo(Doctor::class);
+        return $this->belongsTo(User::class, 'supervisor_id');
     }
 
     public function caregiver()
     {
-        return $this->belongsTo(Caregiver::class);
+        return $this->belongsTo(User::class, 'caregiver_id');
     }
 
-    public function dailyTasks()
+    // ✅ Add this:
+    public function user()
     {
-        return $this->hasMany(DailyTask::class);
+        // Fallback relationship for older code referencing `$roster->user`
+        // It links to caregiver by default.
+        return $this->belongsTo(User::class, 'caregiver_id');
     }
 }
