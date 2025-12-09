@@ -7,51 +7,48 @@ use App\Models\DailyTask;
 use App\Models\Roster;
 use App\Models\Patient;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
 
 class DailyTaskSeeder extends Seeder
 {
     public function run(): void
     {
-        $rosters  = Roster::all();
+        $date = now()->toDateString();
+
+        $roster   = Roster::whereDate('date', $date)->first();
         $patients = Patient::all();
 
-        // These are the human-readable names that will show in any UI
-        $tasks = [
-            'Morning Medication',
-            'Lunch',
-            'Dinner',
-            'Vitals Check',
-            'Exercise Session',
-        ];
-
-        if ($rosters->isEmpty() || $patients->isEmpty()) {
-            // Nothing to seed against – just bail cleanly
+        if (!$roster || $patients->isEmpty()) {
             return;
         }
 
-        foreach ($rosters as $roster) {
-            // Take up to 2 random patients for this roster
-            $randomPatients = $patients->random(min(2, $patients->count()));
+        // Map of task_type => human label
+        $taskMap = [
+            DailyTask::TASK_MORNING_MEDICINE   => 'Morning Medicine',
+            DailyTask::TASK_AFTERNOON_MEDICINE => 'Afternoon Medicine',
+            DailyTask::TASK_NIGHT_MEDICINE     => 'Night Medicine',
+            DailyTask::TASK_BREAKFAST          => 'Breakfast',
+            DailyTask::TASK_LUNCH              => 'Lunch',
+            DailyTask::TASK_DINNER             => 'Dinner',
+        ];
 
-            foreach ($randomPatients as $patient) {
-                foreach ($tasks as $taskName) {
-                    DailyTask::create([
-                        'roster_id'    => $roster->id,
-                        'patient_id'   => $patient->id,
-
-                        // NEW FIELDS (required by your migration)
-                        'task_date'    => Carbon::today(),                // or random date if you prefer
-                        'task_type'    => Str::slug($taskName, '_'),      // e.g. 'Morning Medication' -> 'morning_medication'
-
-                        'task_name'    => $taskName,
+        foreach ($patients as $patient) {
+            foreach ($taskMap as $type => $label) {
+                DailyTask::updateOrCreate(
+                    [
+                        'roster_id'  => $roster->id,
+                        'patient_id' => $patient->id,
+                        'task_date'  => $date,
+                        'task_type'  => $type,
+                    ],
+                    [
+                        'task_name'    => $label,
                         'completed'    => (bool) rand(0, 1),
                         'completed_at' => rand(0, 1)
                             ? Carbon::now()->subHours(rand(1, 8))
                             : null,
-                        'remarks'      => fake()->sentence(5),
-                    ]);
-                }
+                        'remarks'      => '',
+                    ]
+                );
             }
         }
     }

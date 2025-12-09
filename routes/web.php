@@ -110,8 +110,17 @@ Route::middleware(['auth', 'role:Doctor'])->group(function () {
 // Caregiver Routes
 // ========================
 Route::middleware(['auth', 'role:Caregiver'])->group(function () {
-    Route::get('/caregiver/dashboard', [CaregiverController::class, 'index'])->name('caregiver.dashboard');
-    Route::resource('/caregiver/tasks', CaregiverController::class)->except(['index']);
+    // Caregiver home: shows date + list of assigned patients
+    Route::get('/caregiver/dashboard', [CaregiverController::class, 'index'])
+        ->name('caregiver.dashboard');
+
+    // Patient chart for a specific patient on a given date
+    Route::get('/caregiver/patient/{patient}', [CaregiverController::class, 'showPatient'])
+        ->name('caregiver.patient.show');
+
+    // Save checkbox updates for that patient + date
+    Route::post('/caregiver/patient/{patient}/tasks', [CaregiverController::class, 'updatePatientTasks'])
+        ->name('caregiver.patient.updateTasks');
 });
 
 // ========================
