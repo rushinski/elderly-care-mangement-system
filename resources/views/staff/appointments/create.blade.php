@@ -5,22 +5,6 @@
 @section('content')
     <h1 class="text-2xl font-bold mb-4">Doctor's Appointment</h1>
 
-    @if (session('success'))
-        <div class="mb-4 px-4 py-2 bg-green-100 text-green-800 text-sm rounded">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="mb-4 px-4 py-2 bg-red-100 text-red-800 text-sm rounded">
-            <ul class="list-disc list-inside">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <x-card>
         <form method="POST" action="{{ route('staff.appointments.store') }}" id="appointment-form">
             @csrf
@@ -149,7 +133,15 @@ document.addEventListener('DOMContentLoaded', function () {
         doctorSelect.appendChild(opt);
     }
 
-    // Patient lookup
+    // 1) Prevent ENTER in patient_id from submitting the form
+    patientIdInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();   // stop form submit
+            this.blur();          // trigger lookup instead
+        }
+    });
+
+    // 2) Patient lookup on blur (when leaving the field OR via the Enter handler)
     patientIdInput.addEventListener('blur', function () {
         const id = this.value.trim();
         patientNameInput.value = '';
@@ -169,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     });
 
-    // Doctors by date
+    // 3) Doctors dropdown updates when date changes
     dateInput.addEventListener('change', function () {
         const date = this.value;
         resetDoctors('Loading...');
@@ -190,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 resetDoctors('Select doctor');
                 items.forEach(doc => {
                     const opt = document.createElement('option');
-                    opt.value = doc.id;
+                    opt.value = doc.id;      // doctors.id
                     opt.textContent = doc.name;
                     doctorSelect.appendChild(opt);
                 });
@@ -200,10 +192,11 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     });
 
-    // Preload doctors if date prefilled
+    // 4) If date already has a value, preload doctors
     if (dateInput.value) {
         dateInput.dispatchEvent(new Event('change'));
     }
 });
 </script>
 @endpush
+

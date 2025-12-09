@@ -4,30 +4,34 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class Roster extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'supervisor_id',    // users.id (Supervisor)
-        'doctor_id',        // users.id (Doctor user)
-        'caregiver_1_id',   // users.id
-        'caregiver_2_id',   // users.id
-        'caregiver_3_id',   // users.id
-        'caregiver_4_id',   // users.id
+        'supervisor_id',   // users.id
+        'doctor_id',       // users.id
+        'caregiver_1_id',  // users.id
+        'caregiver_2_id',  // users.id
+        'caregiver_3_id',  // users.id
+        'caregiver_4_id',  // users.id
         'date',
     ];
 
-    // Relationships (all to User – role dictates type)
+    protected $casts = [
+        'date' => 'date',
+    ];
+
     public function supervisor()
     {
         return $this->belongsTo(User::class, 'supervisor_id');
     }
 
-    public function doctorUser()
+    // user record for the doctor on that day
+    public function doctor()
     {
-        // user record for the doctor on this roster
         return $this->belongsTo(User::class, 'doctor_id');
     }
 
@@ -51,10 +55,7 @@ class Roster extends Model
         return $this->belongsTo(User::class, 'caregiver_4_id');
     }
 
-    /**
-     * Backward compatibility when legacy code calls $roster->user
-     * (treat caregiver_1 as primary staff)
-     */
+    // Legacy alias so old code using $roster->user still works
     public function user()
     {
         return $this->belongsTo(User::class, 'caregiver_1_id');
