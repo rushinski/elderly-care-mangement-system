@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('rosters', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('supervisor_id')->constrained('supervisors')->onDelete('cascade');
-            $table->foreignId('doctor_id')->nullable()->constrained('doctors')->onDelete('cascade');
-            $table->foreignId('caregiver_id')->nullable()->constrained('caregivers')->onDelete('cascade');
+            $table->foreignId('supervisor_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('doctor_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('caregiver_1')->nullable()->constrained('users')->nullOnDelete();
             $table->date('date');
             $table->string('shift')->default('Day'); // Day/Night
             $table->text('notes')->nullable();

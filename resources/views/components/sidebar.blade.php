@@ -19,7 +19,6 @@
                 class="block px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.employees.*') ? 'bg-gray-100 font-semibold' : '' }}">
                     Employees
                 </a>
-
                 <a href="{{ route('applications.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     View Applications
                 </a>
@@ -37,6 +36,14 @@
                 </a>
                 <a href="{{ route('rosters.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     View Roster
+                </a>
+                <a href="{{ route('staff.appointments.create') }}"
+                    class="block px-3 py-2 rounded hover:bg-gray-100">
+                    Create Appointment
+                </a>
+                {{-- Supervisor-only pages --}}
+                <a href="{{ route('rosters.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
+                    Create Roster
                 </a>
 
             {{-- ================= Supervisor ================= --}}
@@ -68,6 +75,10 @@
                 </a>
                 <a href="{{ route('rosters.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     View Roster
+                </a>
+                <a href="{{ route('staff.appointments.create') }}"
+                    class="block px-3 py-2 rounded hover:bg-gray-100">
+                        Create Appointment
                 </a>
 
             {{-- ================= Doctor ================= --}}
