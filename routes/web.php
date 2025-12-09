@@ -11,6 +11,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserApplicationController;
+use App\Http\Controllers\StaffPatientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -92,4 +93,20 @@ Route::middleware(['auth', 'role:Family'])->group(function () {
 // ========================
 Route::fallback(function () {
     return redirect('/')->withErrors(['route' => 'The page you are looking for does not exist.']);
+});
+
+// =====================================
+// Shared Patient Directory / Management
+// =====================================
+
+// All staff roles can view + search
+Route::middleware(['auth', 'role:Admin,Supervisor,Doctor,Caregiver'])->group(function () {
+    Route::get('/staff/patients', [StaffPatientController::class, 'index'])
+        ->name('staff.patients.index');
+});
+
+// Only Admin + Supervisor can update group / admission_date
+Route::middleware(['auth', 'role:Admin,Supervisor'])->group(function () {
+    Route::put('/staff/patients/{patient}', [StaffPatientController::class, 'update'])
+        ->name('staff.patients.update');
 });

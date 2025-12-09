@@ -33,6 +33,12 @@
                    class="block px-3 py-2 rounded hover:bg-gray-100">
                     Payment Summary
                 </a>
+                {{-- Shared Patient Directory / Management --}}
+                <a href="{{ route('staff.patients.index') }}"
+                   class="block px-3 py-2 rounded hover:bg-gray-100">
+                    Patient Directory
+                </a>
+
             @elseif($role === 'Supervisor')
                 <a href="{{ route('supervisor.dashboard') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
@@ -42,6 +48,12 @@
                    class="block px-3 py-2 rounded hover:bg-gray-100">
                     Create Roster
                 </a>
+                {{-- Shared Patient Directory / Management --}}
+                <a href="{{ route('staff.patients.index') }}"
+                   class="block px-3 py-2 rounded hover:bg-gray-100">
+                    Patient Directory
+                </a>
+
             @elseif($role === 'Doctor')
                 <a href="{{ route('doctor.dashboard') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
@@ -51,6 +63,12 @@
                    class="block px-3 py-2 rounded hover:bg-gray-100">
                     Create Appointment
                 </a>
+                {{-- Shared Patient Directory / Management --}}
+                <a href="{{ route('staff.patients.index') }}"
+                   class="block px-3 py-2 rounded hover:bg-gray-100">
+                    Patient Directory
+                </a>
+
             @elseif($role === 'Caregiver')
                 <a href="{{ route('caregiver.dashboard') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
@@ -60,11 +78,18 @@
                    class="block px-3 py-2 rounded hover:bg-gray-100">
                     Add Daily Task
                 </a>
+                {{-- Shared Patient Directory / Management --}}
+                <a href="{{ route('staff.patients.index') }}"
+                   class="block px-3 py-2 rounded hover:bg-gray-100">
+                    Patient Directory
+                </a>
+
             @elseif($role === 'Patient')
                 <a href="{{ route('patient.dashboard') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
                     My Dashboard
                 </a>
+
             @elseif($role === 'Family')
                 <a href="{{ route('family.dashboard') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
