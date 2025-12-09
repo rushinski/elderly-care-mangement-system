@@ -26,22 +26,11 @@ use App\Http\Controllers\StaffAppointmentController;
 | This file finalizes the backend routing for Phase 2.1.
 |
 */
-// Shared public view (everyone)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/rosters', [RosterController::class, 'index'])->name('rosters.index');
-});
-
-// Restricted (Admin + Supervisor)
-Route::middleware(['auth', 'role:Admin,Supervisor'])->group(function () {
-    Route::get('/rosters/create', [RosterController::class, 'create'])->name('rosters.create');
-    Route::post('/rosters', [RosterController::class, 'store'])->name('rosters.store');
-});
 // Employee management (Admin only)
 Route::middleware(['auth', 'role:Admin'])->group(function () {
     Route::get('/admin/employees', [App\Http\Controllers\AdminController::class, 'employees'])->name('admin.employees.index');
     Route::post('/admin/employees/update-salary', [App\Http\Controllers\AdminController::class, 'updateSalary'])->name('admin.employees.updateSalary');
 });
-
 
 // ========================
 // Authentication Routes

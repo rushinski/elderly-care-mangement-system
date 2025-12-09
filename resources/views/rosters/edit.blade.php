@@ -4,6 +4,38 @@
 @section('title', 'Edit Roster')
 
 @section('content')
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const caregiverSelects = document.querySelectorAll("select[id^='caregiver_']");
+
+    function refreshCaregiverOptions() {
+        const selectedValues = Array.from(caregiverSelects)
+            .map(s => s.value)
+            .filter(v => v !== "");
+
+        caregiverSelects.forEach(s => {
+            Array.from(s.options).forEach(opt => {
+                if (!opt.value) return; // skip placeholder
+
+                // Disable if selected in *another* select
+                if (selectedValues.includes(opt.value) && opt.value !== s.value) {
+                    opt.disabled = true;
+                } else {
+                    opt.disabled = false;
+                }
+            });
+        });
+    }
+
+    caregiverSelects.forEach(select => {
+        select.addEventListener("change", refreshCaregiverOptions);
+    });
+
+    refreshCaregiverOptions();
+});
+</script>
+
 <h1 class="text-2xl font-bold mb-4">Edit Roster</h1>
 
 <x-card title="Update Roster Entry">
