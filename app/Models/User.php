@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Carbon\Carbon;
 
 class User extends Authenticatable
 {
@@ -14,15 +15,10 @@ class User extends Authenticatable
     protected $fillable = [
         'first_name',
         'last_name',
-        'name',            // keep for now; we’ll set it from first/last
         'email',
-        'password',
         'phone',
         'address',
         'date_of_birth',
-        'family_code',
-        'emergency_contact',
-        'emergency_contact_relation',
         'role_id',
     ];
 
@@ -30,6 +26,9 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    // Optional: if you ever cast to JSON
+    // protected $appends = ['full_name', 'age'];
 
     // Relationships
     public function role()
@@ -55,5 +54,21 @@ class User extends Authenticatable
     public function supervisor()
     {
         return $this->hasOne(Supervisor::class);
+    }
+
+    // --------- Helpers ---------
+
+    public function getFullNameAttribute(): string
+    {
+        return trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''));
+    }
+
+    public function getAgeAttribute(): ?int
+    {
+        if (!$this->date_of_birth) {
+            return null;
+        }
+
+        return Carbon::parse($this->date_of_birth)->age;
     }
 }
