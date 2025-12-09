@@ -35,7 +35,7 @@
                     Patient Directory
                 </a>
                 <a href="{{ route('rosters.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
-                    View Roster
+                    Roster Actions
                 </a>
                 <a href="{{ route('staff.appointments.create') }}"
                     class="block px-3 py-2 rounded hover:bg-gray-100">
@@ -67,7 +67,7 @@
                     View Applications
                 </a>
                 <a href="{{ route('rosters.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
-                    View Roster
+                    Roster Actions
                 </a>
                 <a href="{{ route('staff.appointments.create') }}"
                     class="block px-3 py-2 rounded hover:bg-gray-100">

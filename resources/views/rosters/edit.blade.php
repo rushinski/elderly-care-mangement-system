@@ -1,4 +1,3 @@
-{{-- resources/views/supervisor/edit-roster.blade.php --}}
 @extends('layouts.app')
 
 @section('title', 'Edit Roster')
@@ -16,9 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         caregiverSelects.forEach(s => {
             Array.from(s.options).forEach(opt => {
-                if (!opt.value) return; // skip placeholder
+                if (!opt.value) return;
 
-                // Disable if selected in *another* select
                 if (selectedValues.includes(opt.value) && opt.value !== s.value) {
                     opt.disabled = true;
                 } else {
@@ -47,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div>
             <label for="date" class="block text-sm font-semibold">Date</label>
             <input type="date" name="date" id="date"
-                   value="{{ old('date', $roster->date) }}"
+                   value="{{ old('date', $roster->date->format('Y-m-d')) }}"
                    class="border rounded px-2 py-1 w-full" required>
         </div>
 
@@ -81,13 +79,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         {{-- Caregivers --}}
         @for ($i = 1; $i <= 4; $i++)
+            @php
+                $field = "caregiver_{$i}_id";
+            @endphp
             <div>
                 <label for="caregiver_{{ $i }}" class="block text-sm font-semibold">Caregiver {{ $i }}</label>
-                <select name="caregiver_{{ $i }}" id="caregiver_{{ $i }}" class="border rounded px-2 py-1 w-full">
+                <select name="{{ $field }}" id="caregiver_{{ $i }}" class="border rounded px-2 py-1 w-full">
                     <option value="">-- Select Caregiver {{ $i }} --</option>
                     @foreach($caregivers as $caregiver)
                         <option value="{{ $caregiver->id }}"
-                            {{ old("caregiver_$i", $roster?->{"caregiver_$i"}) == $caregiver->id ? 'selected' : '' }}>
+                            {{ old($field, $roster->{$field}) == $caregiver->id ? 'selected' : '' }}>
                             {{ $caregiver->name }}
                         </option>
                     @endforeach
@@ -95,8 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         @endfor
 
-
-        {{-- Buttons --}}
         <div class="flex gap-3 pt-4">
             <a href="{{ route('supervisor.dashboard') }}"
                class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400">

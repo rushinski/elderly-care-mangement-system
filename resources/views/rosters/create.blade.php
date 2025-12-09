@@ -5,7 +5,6 @@
 @section('content')
 <h1 class="text-2xl font-bold mb-4">New Roster</h1>
 
-{{-- Prevent duplicate caregivers --}}
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const caregiverSelects = document.querySelectorAll("select[id^='caregiver_']");
@@ -19,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
             Array.from(s.options).forEach(opt => {
                 if (!opt.value) return; // skip placeholder
 
-                // Disable if selected in *another* select
                 if (selectedValues.includes(opt.value) && opt.value !== s.value) {
                     opt.disabled = true;
                 } else {
@@ -88,19 +86,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
         {{-- Caregivers 1–4 --}}
         @for ($i = 1; $i <= 4; $i++)
+            @php
+                $field = "caregiver_{$i}_id";
+            @endphp
             <div>
                 <label class="block text-xs font-semibold mb-1">Caregiver {{ $i }}</label>
-                <select name="caregiver_{{ $i }}" id="caregiver_{{ $i }}"
+                <select name="{{ $field }}" id="caregiver_{{ $i }}"
                         class="border rounded w-full px-2 py-1 text-sm">
                     <option value="">Select caregiver {{ $i }}...</option>
                     @foreach($caregivers as $caregiver)
                         <option value="{{ $caregiver->id }}"
-                            {{ old("caregiver_$i") == $caregiver->id ? 'selected' : '' }}>
+                            {{ old($field) == $caregiver->id ? 'selected' : '' }}>
                             {{ $caregiver->name }}
                         </option>
                     @endforeach
                 </select>
-                @error("caregiver_$i")
+                @error($field)
                 <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                 @enderror
             </div>
