@@ -1,5 +1,5 @@
 <?php
-
+// app/Models/User.php
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -20,10 +20,10 @@ class User extends Authenticatable
         'address',
         'date_of_birth',
         'role_id',
+        'password',
     ];
 
     protected $hidden = [
-        'password',
         'remember_token',
     ];
 

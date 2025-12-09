@@ -47,20 +47,12 @@ Route::middleware(['auth', 'role:Admin'])->group(function () {
     Route::put('/admin/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/admin/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::get('/admin/payments/summary', [PaymentController::class, 'summary'])->name('payments.summary');
-    Route::get('/admin/applications', [UserApplicationController::class, 'index'])->name('applications.index');
-    Route::get('/admin/applications/{application}', [UserApplicationController::class, 'show'])->name('applications.show');
-    Route::post('/admin/applications/{application}/approve', [UserApplicationController::class, 'approve'])->name('applications.approve');
-    Route::post('/admin/applications/{application}/reject', [UserApplicationController::class, 'reject'])->name('applications.reject');
 });
 
 Route::middleware(['auth', 'role:Supervisor'])->group(function () {
     Route::get('/supervisor/dashboard', [SupervisorController::class, 'index'])->name('supervisor.dashboard');
     Route::resource('/supervisor/rosters', SupervisorController::class)->except(['index']);
     Route::post('/supervisor/reports/{report}/review', [SupervisorController::class, 'reviewReport'])->name('supervisor.reviewReport');
-    Route::get('/supervisor/applications', [UserApplicationController::class, 'index'])->name('applications.index');
-    Route::get('/supervisor/applications/{application}', [UserApplicationController::class, 'show'])->name('applications.show');
-    Route::post('/supervisor/applications/{application}/approve', [UserApplicationController::class, 'approve'])->name('applications.approve');
-    Route::post('/supervisor/applications/{application}/reject', [UserApplicationController::class, 'reject'])->name('applications.reject');
 });
 
 Route::middleware(['auth', 'role:Doctor'])->group(function () {
@@ -110,3 +102,21 @@ Route::middleware(['auth', 'role:Admin,Supervisor'])->group(function () {
     Route::put('/staff/patients/{patient}', [StaffPatientController::class, 'update'])
         ->name('staff.patients.update');
 });
+
+// =========================
+// Account Applications (Admin + Supervisor)
+// =========================
+Route::middleware(['auth', 'role:Admin,Supervisor'])->group(function () {
+    Route::get('/admin/applications', [UserApplicationController::class, 'index'])
+        ->name('applications.index');
+
+    Route::get('/admin/applications/{application}', [UserApplicationController::class, 'show'])
+        ->name('applications.show');
+
+    Route::post('/admin/applications/{application}/approve', [UserApplicationController::class, 'approve'])
+        ->name('applications.approve');
+
+    Route::post('/admin/applications/{application}/reject', [UserApplicationController::class, 'reject'])
+        ->name('applications.reject');
+});
+
