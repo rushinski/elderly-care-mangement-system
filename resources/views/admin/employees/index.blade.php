@@ -5,7 +5,7 @@
 @section('content')
 <h1 class="text-2xl font-bold mb-4">Employees</h1>
 
-<x-card title="Employees Directory" :actions="view('admin.employees._actions')">
+<x-card title="Employees Directory" :actions="!isset($readonly) || !$readonly ? view('admin.employees._actions') : null">
     <div class="flex flex-wrap gap-2 mb-3">
         <input
             type="text"
@@ -32,15 +32,19 @@
                 <td class="py-2">{{ $employee->name }}</td>
                 <td>{{ $employee->role->name ?? '-' }}</td>
                 <td>{{ $employee->facility ?? '-' }}</td>
-                <td>${{ number_format($employee->salary ?? 0, 2) }}</td>
+                <td>
+                    ${{ number_format($employee->salary ?? 0, 2) }}
+                </td>
                 <td class="text-right">
-                    @if(Auth::user()->role->name === 'Admin')
+                    @if(!isset($readonly) || !$readonly)
+                        {{-- Admin Controls --}}
                         <a href="{{ route('admin.employees.edit', $employee) }}"
                            class="text-xs text-blue-600 hover:underline">
                             Edit Salary
                         </a>
                     @else
-                        <span class="text-xs text-gray-400">View only</span>
+                        {{-- Supervisor View-Only Mode --}}
+                        <span class="text-xs text-gray-400 italic">View Only</span>
                     @endif
                 </td>
             </tr>

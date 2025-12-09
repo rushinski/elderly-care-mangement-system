@@ -6,92 +6,185 @@ use Illuminate\Http\Request;
 use App\Models\Roster;
 use App\Models\User;
 use App\Models\Report;
+use App\Models\Appointment;
+use App\Models\Patient;
 
 class SupervisorController extends Controller
 {
     /**
-     * Display supervisor dashboard with staff rosters and pending reports.
+     * Display Supervisor Dashboard — overview of rosters, reports, etc.
      */
     public function index()
     {
-        $rosters = Roster::with(['user', 'caregiver', 'supervisor'])->latest()->get();
-        $reports = \App\Models\Report::where('status', 'pending')
+        $rosters = Roster::with(['supervisor', 'doctor', 'caregiver1', 'caregiver2', 'caregiver3', 'caregiver4'])
+            ->latest()
+            ->get();
+
+        $reports = Report::where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $employeeCount = User::whereHas('role', function ($q) {
+            $q->whereIn('name', ['Caregiver', 'Doctor', 'Nurse']);
+        })->count();
 
+        $patientCount = Patient::count();
+        $pendingReports = $reports->count();
+        $appointmentsCount = Appointment::whereDate('appointment_date', '>=', now())->count();
 
-        return view('supervisor.dashboard', compact('rosters', 'reports'));
+        return view('supervisor.dashboard', compact(
+            'rosters',
+            'reports',
+            'employeeCount',
+            'patientCount',
+            'pendingReports',
+            'appointmentsCount'
+        ));
     }
 
     /**
-     * Display form for creating a new roster entry.
+     * Show all employees (read-only view using Admin's blade).
+     */
+    public function employees()
+    {
+        $employees = User::with('role')
+            ->whereHas('role', function ($q) {
+                $q->whereIn('name', ['Caregiver', 'Doctor', 'Nurse']);
+            })
+            ->paginate(10);
+
+        $readonly = true;
+
+        return view('admin.employees.index', compact('employees', 'readonly'));
+    }
+
+    /**
+     * Display all reports for the supervisor (with filtering).
+     */
+    public function reports(Request $request)
+    {
+        $status = $request->query('status');
+        $query = Report::query();
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $reports = $query->orderBy('created_at', 'desc')->paginate(10);
+        $readonly = false; // Supervisor can approve/reject
+
+        return view('admin.reports', compact('reports', 'status', 'readonly'));
+    }
+
+    /**
+     * Display doctor appointments (read-only for Supervisor).
+     */
+    public function appointments()
+    {
+        $appointments = Appointment::with(['doctor', 'patient'])
+            ->orderBy('appointment_date', 'desc')
+            ->paginate(10);
+
+        $readonly = true;
+
+        return view('admin.appointments.index', compact('appointments', 'readonly'));
+    }
+
+    /**
+     * Show form for creating a new roster.
      */
     public function create()
     {
-        $staff = User::whereHas('role', function ($q) {
-            $q->whereIn('name', ['Caregiver', 'Doctor', 'Nurse']);
-        })->get();
+        $supervisors = User::whereHas('role', fn($q) => $q->where('name', 'Supervisor'))->get();
+        $doctors = User::whereHas('role', fn($q) => $q->where('name', 'Doctor'))->get();
+        $caregivers = User::whereHas('role', fn($q) => $q->where('name', 'Caregiver'))->get();
 
-        return view('supervisor.create-roster', compact('staff'));
+        return view('supervisor.create-roster', compact('supervisors', 'doctors', 'caregivers'));
     }
 
     /**
-     * Store a new roster assignment.
+     * Store a new roster record.
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'supervisor_id' => 'required|exists:users,id',
+            'doctor_id' => 'required|exists:users,id',
+            'caregiver_1' => 'nullable|exists:users,id',
+            'caregiver_2' => 'nullable|exists:users,id',
+            'caregiver_3' => 'nullable|exists:users,id',
+            'caregiver_4' => 'nullable|exists:users,id',
             'date' => 'required|date',
-            'shift' => 'required|string|max:50',
         ]);
 
-        // ✅ Automatically attach the logged-in supervisor
-        Roster::create([
-            'supervisor_id' => auth()->id(),
-            'caregiver_id'  => $validated['user_id'],
-            'date'          => $validated['date'],
-            'shift'         => $validated['shift'],
-            'notes'         => $request->input('notes', null),
-        ]);
+        // ✅ Prevent duplicate caregivers
+        $caregivers = [
+            $request->caregiver_1,
+            $request->caregiver_2,
+            $request->caregiver_3,
+            $request->caregiver_4,
+        ];
+
+        $filtered = array_filter($caregivers);
+        if (count($filtered) !== count(array_unique($filtered))) {
+            return back()->withErrors(['caregivers' => 'Each caregiver must be unique.'])->withInput();
+        }
+
+        Roster::create($validated);
 
         return redirect()
             ->route('supervisor.dashboard')
             ->with('success', 'Roster created successfully.');
     }
 
-
     /**
-     * Show a specific roster entry (rosters.show).
+     * Show a specific roster entry in full detail.
      */
     public function show(Roster $roster)
     {
+        $roster->load(['supervisor', 'doctor', 'caregiver1', 'caregiver2', 'caregiver3', 'caregiver4']);
         return view('supervisor.view-roster', compact('roster'));
     }
 
     /**
-     * Edit an existing roster entry.
+     * Show edit form for an existing roster.
      */
     public function edit(Roster $roster)
     {
-        $staff = User::whereHas('role', function ($q) {
-            $q->whereIn('name', ['Caregiver', 'Doctor', 'Nurse']);
-        })->get();
+        $supervisors = User::whereHas('role', fn($q) => $q->where('name', 'Supervisor'))->get();
+        $doctors = User::whereHas('role', fn($q) => $q->where('name', 'Doctor'))->get();
+        $caregivers = User::whereHas('role', fn($q) => $q->where('name', 'Caregiver'))->get();
 
-        return view('supervisor.edit-roster', compact('roster', 'staff'));
+        return view('supervisor.edit-roster', compact('roster', 'supervisors', 'doctors', 'caregivers'));
     }
 
     /**
-     * Update an existing roster entry.
+     * Update an existing roster record.
      */
     public function update(Request $request, Roster $roster)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'supervisor_id' => 'required|exists:users,id',
+            'doctor_id' => 'required|exists:users,id',
+            'caregiver_1' => 'nullable|exists:users,id',
+            'caregiver_2' => 'nullable|exists:users,id',
+            'caregiver_3' => 'nullable|exists:users,id',
+            'caregiver_4' => 'nullable|exists:users,id',
             'date' => 'required|date',
-            'shift' => 'required|string|max:50',
         ]);
+
+        // ✅ Prevent duplicate caregivers
+        $caregivers = [
+            $request->caregiver_1,
+            $request->caregiver_2,
+            $request->caregiver_3,
+            $request->caregiver_4,
+        ];
+
+        $filtered = array_filter($caregivers);
+        if (count($filtered) !== count(array_unique($filtered))) {
+            return back()->withErrors(['caregivers' => 'Each caregiver must be unique.'])->withInput();
+        }
 
         $roster->update($validated);
 
@@ -101,7 +194,7 @@ class SupervisorController extends Controller
     }
 
     /**
-     * Delete a roster entry.
+     * Delete a roster record.
      */
     public function destroy(Roster $roster)
     {
@@ -121,12 +214,12 @@ class SupervisorController extends Controller
             'status' => 'required|in:approved,rejected',
         ]);
 
-        $report->status = $validated['status'];
-        $report->save();
+        $report->update([
+            'status' => $validated['status'],
+        ]);
 
         return redirect()
-            ->route('supervisor.dashboard')
-            ->with('success', 'Report status updated.');
+            ->route('supervisor.reports')
+            ->with('success', 'Report status updated successfully.');
     }
-
 }

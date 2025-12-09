@@ -10,7 +10,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserApplicationController;
-
+use App\Http\Controllers\RosterController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -21,7 +21,16 @@ use App\Http\Controllers\UserApplicationController;
 | This file finalizes the backend routing for Phase 2.1.
 |
 */
+// Shared public view (everyone)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/rosters', [RosterController::class, 'index'])->name('rosters.index');
+});
 
+// Restricted (Admin + Supervisor)
+Route::middleware(['auth', 'role:Admin,Supervisor'])->group(function () {
+    Route::get('/rosters/create', [RosterController::class, 'create'])->name('rosters.create');
+    Route::post('/rosters', [RosterController::class, 'store'])->name('rosters.store');
+});
 // ========================
 // Authentication Routes
 // ========================
@@ -51,16 +60,33 @@ Route::middleware(['auth', 'role:Admin'])->group(function () {
     Route::post('/admin/applications/{application}/reject', [UserApplicationController::class, 'reject'])->name('applications.reject');
 });
 
+// ========================
+// Supervisor Routes
+// ========================
 Route::middleware(['auth', 'role:Supervisor'])->group(function () {
+    // Dashboard & Rosters
     Route::get('/supervisor/dashboard', [SupervisorController::class, 'index'])->name('supervisor.dashboard');
     Route::resource('/supervisor/rosters', SupervisorController::class)->except(['index']);
-    Route::post('/supervisor/reports/{report}/review', [SupervisorController::class, 'reviewReport'])->name('supervisor.reviewReport');
+
+    // Shared Admin Pages (Read-only / Controlled Access)
+    Route::get('/supervisor/employees', [SupervisorController::class, 'employees'])->name('supervisor.employees');
+    Route::get('/supervisor/reports', [SupervisorController::class, 'reports'])->name('supervisor.reports');
+    Route::get('/supervisor/appointments', [SupervisorController::class, 'appointments'])->name('supervisor.appointments');
+
+    // Report Review Actions
+    Route::post('/supervisor/reports/{report}/review', [SupervisorController::class, 'reviewReport'])
+        ->name('supervisor.reviewReport');
+
+    // Application Management (Shared Logic)
     Route::get('/supervisor/applications', [UserApplicationController::class, 'index'])->name('applications.index');
     Route::get('/supervisor/applications/{application}', [UserApplicationController::class, 'show'])->name('applications.show');
     Route::post('/supervisor/applications/{application}/approve', [UserApplicationController::class, 'approve'])->name('applications.approve');
     Route::post('/supervisor/applications/{application}/reject', [UserApplicationController::class, 'reject'])->name('applications.reject');
 });
 
+// ========================
+// Doctor Routes
+// ========================
 Route::middleware(['auth', 'role:Doctor'])->group(function () {
     Route::get('/doctor/dashboard', [DoctorController::class, 'index'])->name('doctor.dashboard');
     Route::resource('/doctor/appointments', DoctorController::class)->except(['index']);
@@ -68,11 +94,17 @@ Route::middleware(['auth', 'role:Doctor'])->group(function () {
     Route::post('/doctor/prescriptions', [DoctorController::class, 'storePrescription'])->name('doctor.storePrescription');
 });
 
+// ========================
+// Caregiver Routes
+// ========================
 Route::middleware(['auth', 'role:Caregiver'])->group(function () {
     Route::get('/caregiver/dashboard', [CaregiverController::class, 'index'])->name('caregiver.dashboard');
     Route::resource('/caregiver/tasks', CaregiverController::class)->except(['index']);
 });
 
+// ========================
+// Patient Routes
+// ========================
 Route::middleware(['auth', 'role:Patient'])->group(function () {
     Route::get('/patient/home', [PatientController::class, 'index'])->name('patient.dashboard');
     Route::get('/patient/appointment/{appointment}', [PatientController::class, 'showAppointment'])->name('patient.showAppointment');
@@ -80,6 +112,9 @@ Route::middleware(['auth', 'role:Patient'])->group(function () {
     Route::get('/patient/payment/{payment}', [PatientController::class, 'showPayment'])->name('patient.showPayment');
 });
 
+// ========================
+// Family Routes
+// ========================
 Route::middleware(['auth', 'role:Family'])->group(function () {
     Route::get('/family/home', [FamilyController::class, 'index'])->name('family.dashboard');
     Route::get('/family/appointment/{appointment}', [FamilyController::class, 'showAppointment'])->name('family.showAppointment');
