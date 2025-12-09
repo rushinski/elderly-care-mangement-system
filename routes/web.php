@@ -95,6 +95,8 @@ Route::middleware(['auth', 'role:Supervisor'])->group(function () {
 
     // Application Management (Shared Logic)
 });
+Route::get('doctor/patient/{patient}', [DoctorController::class, 'showPatient'])->name('doctor.patient.show');
+Route::post('doctor/prescription/store', [DoctorController::class, 'storePrescription'])->name('doctor.storePrescription');
 
 // ========================
 // Doctor Routes

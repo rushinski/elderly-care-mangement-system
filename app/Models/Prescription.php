@@ -12,12 +12,13 @@ class Prescription extends Model
     protected $fillable = [
         'appointment_id',
         'patient_id',
-        'medicine_name',
-        'dosage',
-        'frequency',
-        'duration_days',
-        'instructions',
+        'comment',
+        'morning_med',
+        'afternoon_med',
+        'night_med',
     ];
+
+
 
     // Relationships
     public function appointment()

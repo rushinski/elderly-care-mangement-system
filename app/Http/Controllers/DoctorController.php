@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Appointment;
 use App\Models\Prescription;
 use App\Models\Patient;
+use Carbon\Carbon;
 
 class DoctorController extends Controller
 {
@@ -41,7 +42,13 @@ class DoctorController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        Appointment::create($validated);
+        Appointment::create([
+            'patient_id' => $validated['patient_id'],
+            'appointment_date' => $validated['date'],
+            'appointment_time' => $validated['time'],
+            'notes' => $validated['notes'] ?? null,
+            'doctor_id' => auth()->user()->doctor->id ?? null,
+        ]);
 
         return redirect()
             ->route('doctor.dashboard')
@@ -49,7 +56,7 @@ class DoctorController extends Controller
     }
 
     /**
-     * Show a specific appointment (appointments.show).
+     * Show a specific appointment.
      */
     public function show(Appointment $appointment)
     {
@@ -77,7 +84,12 @@ class DoctorController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $appointment->update($validated);
+        $appointment->update([
+            'patient_id' => $validated['patient_id'],
+            'appointment_date' => $validated['date'],
+            'appointment_time' => $validated['time'],
+            'notes' => $validated['notes'] ?? null,
+        ]);
 
         return redirect()
             ->route('doctor.dashboard')
@@ -97,29 +109,73 @@ class DoctorController extends Controller
     }
 
     /**
-     * Show form for adding a prescription.
+     * Show a patient's prescriptions and form for new ones.
      */
-    public function createPrescription(Patient $patient)
+    public function showPatient(Patient $patient)
     {
-        return view('doctor.create-prescription', compact('patient'));
+        $doctorId = auth()->user()->doctor->id ?? null;
+        $today = Carbon::today();
+
+        // ✅ Get the most recent appointment for today or earlier
+        $latestAppointment = Appointment::where('doctor_id', $doctorId)
+            ->where('patient_id', $patient->id)
+            ->whereDate('appointment_date', '<=', $today)
+            ->orderByDesc('appointment_date')
+            ->first();
+
+        // ✅ Get all prescriptions for this patient
+        $prescriptions = Prescription::where('patient_id', $patient->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        // ✅ Allow new prescription only if appointment is today & not completed
+        $canPrescribe = $latestAppointment
+            && Carbon::parse($latestAppointment->appointment_date)->isSameDay($today)
+            && $latestAppointment->status !== 'Completed';
+
+        return view('doctor.patient-prescription', compact(
+            'patient',
+            'latestAppointment',
+            'prescriptions',
+            'canPrescribe'
+        ));
     }
 
+
+
     /**
-     * Store a new prescription.
+     * Store a new prescription (only allowed on appointment day).
      */
     public function storePrescription(Request $request)
     {
         $validated = $request->validate([
+            'appointment_id' => 'required|exists:appointments,id',
             'patient_id' => 'required|exists:patients,id',
-            'medication' => 'required|string|max:255',
-            'dosage' => 'required|string|max:255',
-            'instructions' => 'nullable|string',
+            'morning_med' => 'nullable|boolean',
+            'afternoon_med' => 'nullable|boolean',
+            'night_med' => 'nullable|boolean',
+            'comment' => 'nullable|string',
         ]);
+
+        $appointment = Appointment::find($validated['appointment_id']);
+
+        // Check date (you can comment this during testing)
+        if (!$appointment || !\Carbon\Carbon::parse($appointment->appointment_date)->isSameDay(\Carbon\Carbon::today())) {
+            return back()->with('error', 'You can only add prescriptions on the appointment date.');
+        }
+
+        // Convert checkboxes to readable text
+        $validated['morning_med'] = $request->has('morning_med') ? 'Prescribed' : null;
+        $validated['afternoon_med'] = $request->has('afternoon_med') ? 'Prescribed' : null;
+        $validated['night_med'] = $request->has('night_med') ? 'Prescribed' : null;
 
         Prescription::create($validated);
 
+        $appointment->update(['status' => 'Completed']);
+
         return redirect()
-            ->route('doctor.dashboard')
+            ->route('doctor.patient.show', $validated['patient_id'])
             ->with('success', 'Prescription added successfully.');
     }
+
 }

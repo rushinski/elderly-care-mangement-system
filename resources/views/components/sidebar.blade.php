@@ -89,11 +89,15 @@
                 </a>
                 {{-- Shared Patient Directory / Management --}}
                 <a href="{{ route('staff.patients.index') }}"
-                   class="block px-3 py-2 rounded hover:bg-gray-100">
+                class="block px-3 py-2 rounded hover:bg-gray-100">
                     Patient Directory
                 </a>
-                    <a href="{{ route('rosters.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
+                <a href="{{ route('rosters.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     View Roster
+                </a>
+                <a href="{{ route('doctor.patient.show', ['patient' => 1]) }}" 
+                class="block px-3 py-2 rounded hover:bg-gray-100">
+                    View Patient Prescriptions
                 </a>
 
 
