@@ -13,12 +13,19 @@
                 <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Admin Dashboard
                 </a>
+
+                {{-- ✅ New Employees Tab --}}
+                <a href="{{ route('admin.employees.index') }}"
+                class="block px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.employees.*') ? 'bg-gray-100 font-semibold' : '' }}">
+                    Employees
+                </a>
+
                 <a href="{{ route('applications.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     View Applications
                 </a>
                 <a href="{{ route('roles.index') }}"
                     class="block px-3 py-2 rounded hover:bg-gray-100">
-                     Manage Roles
+                    Manage Roles
                 </a>
                 <a href="{{ route('admin.reports') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Reports
@@ -29,15 +36,17 @@
                 <a href="{{ route('payments.summary') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Payment Summary
                 </a>
+
                 {{-- Shared Patient Directory / Management --}}
                 <a href="{{ route('staff.patients.index') }}"
-                   class="block px-3 py-2 rounded hover:bg-gray-100">
+                class="block px-3 py-2 rounded hover:bg-gray-100">
                     Patient Directory
                 </a>
 
                 <a href="{{ route('rosters.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     View Roster
                 </a>
+
 
             {{-- ================= Supervisor ================= --}}
             @elseif($role === 'Supervisor')

@@ -21,28 +21,26 @@ class AdminController extends Controller
 
         return view('admin.dashboard', compact('users', 'reports', 'payments'));
     }
+
     /**
      * Display the employee list for Supervisor (read-only).
      */
     public function indexSupervisor()
     {
-        // Only allow access to supervisors
         if (auth()->user()->role->name !== 'Supervisor') {
             abort(403, 'Unauthorized access.');
         }
 
-        // Retrieve all employees (users except Admins)
-        $employees = \App\Models\User::with('role')
+        $employees = User::with('role')
             ->whereHas('role', function ($q) {
                 $q->whereIn('name', ['Doctor', 'Nurse', 'Caregiver', 'Supervisor']);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        // Reuse the same view (read-only)
         return view('admin.employees.index', [
             'employees' => $employees,
-            'readonly' => true, // flag to control Blade conditions
+            'readonly' => true,
         ]);
     }
 
@@ -80,7 +78,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Show a specific user (for users.show route).
+     * Show a specific user.
      */
     public function show(User $user)
     {
@@ -97,7 +95,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Update the specified user.
+     * Update a user’s details.
      */
     public function update(Request $request, User $user)
     {
@@ -112,6 +110,44 @@ class AdminController extends Controller
         return redirect()
             ->route('admin.dashboard')
             ->with('success', 'User updated successfully.');
+    }
+
+    /**
+     * Display all employees for Admin (editable salary).
+     */
+    public function employees()
+    {
+        $employees = User::with('role')
+            ->whereHas('role', function ($q) {
+                $q->whereIn('name', ['Doctor', 'Nurse', 'Caregiver', 'Supervisor']);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $readonly = false; // Admin can edit salaries
+
+        return view('admin.employees.index', compact('employees', 'readonly'));
+    }
+
+    /**
+     * Update an employee’s salary (Admin only).
+     */
+    public function updateSalary(Request $request)
+    {
+        $validated = $request->validate([
+            'employee_id' => 'required|exists:users,id',
+            'new_salary' => 'required|numeric|min:0',
+        ]);
+
+        $user = User::findOrFail($validated['employee_id']);
+        $oldSalary = $user->salary ?? 0;
+
+        $user->salary = $validated['new_salary'];
+        $user->save();
+
+        return redirect()
+            ->route('admin.employees.index')
+            ->with('success', "Salary updated for {$user->first_name} {$user->last_name} (from \${$oldSalary} to \${$validated['new_salary']}).");
     }
 
     /**
@@ -137,10 +173,6 @@ class AdminController extends Controller
 
     /**
      * View payment summaries.
-     *
-     * NOTE: This method is not wired to any route in your current route:list.
-     * Payments are handled by PaymentController via payments.* routes.
-     * You can safely remove this if unused.
      */
     public function payments()
     {
