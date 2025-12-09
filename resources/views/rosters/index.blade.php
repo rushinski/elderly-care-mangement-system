@@ -7,6 +7,21 @@
 <h1 class="text-2xl font-bold mb-4">Roster Overview</h1>
 
 <x-card title="Full Roster List">
+    {{-- Top-right "Create" button for Admin/Supervisor --}}
+    @php
+        $roleName = auth()->user()->role->name ?? null;
+        $canManageRosters = in_array($roleName, ['Admin', 'Supervisor']);
+    @endphp
+
+    @if($canManageRosters)
+        <div class="flex justify-end mb-3">
+            <a href="{{ route('rosters.create') }}"
+               class="px-3 py-1 text-sm rounded bg-green-600 text-white hover:bg-green-700">
+                + New Roster
+            </a>
+        </div>
+    @endif
+
     <table class="w-full text-sm">
         <thead class="border-b">
         <tr class="text-left">
@@ -17,6 +32,10 @@
             <th>Caregiver 2</th>
             <th>Caregiver 3</th>
             <th>Caregiver 4</th>
+
+            @if($canManageRosters)
+                <th class="text-right">Actions</th>
+            @endif
         </tr>
         </thead>
         <tbody>
@@ -29,10 +48,31 @@
                 <td>{{ $roster->caregiver2->name ?? '-' }}</td>
                 <td>{{ $roster->caregiver3->name ?? '-' }}</td>
                 <td>{{ $roster->caregiver4->name ?? '-' }}</td>
+
+                @if($canManageRosters)
+                    <td class="py-2 text-right whitespace-nowrap">
+                        <a href="{{ route('rosters.edit', $roster) }}"
+                           class="text-xs text-blue-600 hover:underline mr-2">
+                            Edit
+                        </a>
+
+                        <form method="POST"
+                              action="{{ route('rosters.destroy', $roster) }}"
+                              class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    class="text-xs text-red-600 hover:underline"
+                                    onclick="return confirm('Delete this roster entry?')">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                @endif
             </tr>
         @empty
             <tr>
-                <td colspan="7" class="py-3 text-center text-gray-500">
+                <td colspan="{{ $canManageRosters ? 8 : 7 }}" class="py-3 text-center text-gray-500">
                     No roster entries found.
                 </td>
             </tr>

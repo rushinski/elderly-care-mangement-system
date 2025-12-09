@@ -29,7 +29,7 @@ class RosterController extends Controller
         $doctors = User::whereHas('role', fn($q) => $q->where('name', 'Doctor'))->get();
         $caregivers = User::whereHas('role', fn($q) => $q->where('name', 'Caregiver'))->get();
 
-        return view('supervisor.create-roster', compact('supervisors', 'doctors', 'caregivers'));
+        return view('rosters.create', compact('supervisors', 'doctors', 'caregivers'));
     }
 
     /**
