@@ -17,6 +17,10 @@
                    class="block px-3 py-2 rounded hover:bg-gray-100">
                     Create User
                 </a>
+                <a href="{{ route('applications.index') }}"
+                   class="block px-3 py-2 rounded hover:bg-gray-100">
+                    View Applications
+                </a>
                 <a href="{{ route('admin.reports') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
                     Reports

@@ -12,12 +12,23 @@ class Patient extends Model
     protected $fillable = [
         'user_id',
         'patient_code',
+        'family_code',
+        'emergency_contact',
+        'emergency_contact_relation',
         'group',
         'admission_date',
         'medical_history',
     ];
 
+    protected $casts = [
+        'admission_date' => 'date',
+    ];
+
+    // =========================
     // Relationships
+    // =========================
+
+    // Patient may also be a system user (if they log in)
     public function user()
     {
         return $this->belongsTo(User::class);
