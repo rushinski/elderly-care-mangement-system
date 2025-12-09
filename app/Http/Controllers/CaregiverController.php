@@ -2,125 +2,150 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Roster;
-use App\Models\DailyTask;
 use App\Models\Patient;
+use App\Models\DailyTask;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class CaregiverController extends Controller
 {
     /**
-     * Display caregiver dashboard with assigned patients and daily tasks.
+     * Caregiver dashboard:
+     * - Shows date selector
+     * - Determines caregiver's group (A/B/C/D) from roster
+     * - Lists all patients in that group
      */
-    public function index()
+    public function index(Request $request)
+    {
+        $user = auth()->user();
+        $userId = $user->id;
+
+        // Date filter: default to today, changeable via ?date=
+        $selectedDate = $request->query('date', now()->toDateString());
+
+        // Find roster for that day
+        $roster = Roster::whereDate('date', $selectedDate)->first();
+
+        $group = null;
+        if ($roster) {
+            $group = $this->determineGroupForCaregiver($roster, $userId);
+        }
+
+        // If caregiver not on roster or no group, there will be no patients
+        $patients = collect();
+        if ($group) {
+            $patients = Patient::with('user')
+                ->where('group', $group)
+                ->orderBy('id')
+                ->get();
+        }
+
+        return view('caregiver.dashboard', [
+            'selectedDate' => $selectedDate,
+            'roster'       => $roster,
+            'group'        => $group,
+            'patients'     => $patients,
+        ]);
+    }
+
+    /**
+     * Show a specific patient's chart for this caregiver and date.
+     * Caregiver can toggle the six standard tasks.
+     */
+    public function showPatient(Patient $patient, Request $request)
     {
         $userId = auth()->id();
-        $assignedPatients = Roster::where('caregiver_id', $userId)
-            ->with('patient')
-            ->get();
+        $selectedDate = $request->query('date', now()->toDateString());
 
+        $roster = Roster::whereDate('date', $selectedDate)->firstOrFail();
+        $group  = $this->determineGroupForCaregiver($roster, $userId);
 
-        $tasks = \App\Models\DailyTask::whereIn('roster_id', $assignedPatients->pluck('id'))
-            ->latest()
-            ->get();
-
-        return view('caregiver.dashboard', compact('assignedPatients', 'tasks'));
-    }
-
-    /**
-     * Show form for creating a new daily task.
-     */
-    public function create()
-    {
-        $patients = Patient::all();
-        return view('caregiver.create-task', compact('patients'));
-    }
-
-    /**
-     * Store a new daily task.
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'description' => 'required|string|max:500',
-            'status' => 'nullable|string|in:pending,completed',
-        ]);
-
-        DailyTask::create([
-            'caregiver_id' => auth()->id(),
-            'patient_id' => $validated['patient_id'],
-            'description' => $validated['description'],
-            'status' => $validated['status'] ?? 'pending',
-        ]);
-
-        return redirect()
-            ->route('caregiver.dashboard')
-            ->with('success', 'Daily task created successfully.');
-    }
-
-    /**
-     * Display a specific daily task (tasks.show).
-     */
-    public function show(DailyTask $task)
-    {
-        $this->authorizeTask($task);
-
-        return view('caregiver.view-task', compact('task'));
-    }
-
-    /**
-     * Edit a daily task.
-     */
-    public function edit(DailyTask $task)
-    {
-        $this->authorizeTask($task);
-        $patients = Patient::all();
-
-        return view('caregiver.edit-task', compact('task', 'patients'));
-    }
-
-    /**
-     * Update an existing daily task.
-     */
-    public function update(Request $request, DailyTask $task)
-    {
-        $this->authorizeTask($task);
-
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'description' => 'required|string|max:500',
-            'status' => 'required|string|in:pending,completed',
-        ]);
-
-        $task->update($validated);
-
-        return redirect()
-            ->route('caregiver.dashboard')
-            ->with('success', 'Daily task updated successfully.');
-    }
-
-    /**
-     * Delete a daily task.
-     */
-    public function destroy(DailyTask $task)
-    {
-        $this->authorizeTask($task);
-
-        $task->delete();
-
-        return redirect()
-            ->route('caregiver.dashboard')
-            ->with('success', 'Task deleted successfully.');
-    }
-
-    /**
-     * Verify task ownership for security.
-     */
-    private function authorizeTask(DailyTask $task)
-    {
-        if ($task->caregiver_id !== auth()->id()) {
-            abort(403, 'Unauthorized action.');
+        // Security: caregiver must be assigned to this patient group on that day
+        if (!$group || $patient->group !== $group) {
+            abort(403, 'This patient is not assigned to you for the selected day.');
         }
+
+        $tasks = DailyTask::where('patient_id', $patient->id)
+            ->whereDate('task_date', $selectedDate)
+            ->get()
+            ->keyBy('task_type');
+
+        return view('caregiver.patient-tasks', [
+            'patient'      => $patient,
+            'selectedDate' => $selectedDate,
+            'tasks'        => $tasks,
+        ]);
+    }
+
+    /**
+     * Save checkbox updates for a patient + date.
+     */
+    public function updatePatientTasks(Patient $patient, Request $request)
+    {
+        $userId       = auth()->id();
+        $selectedDate = $request->input('date', now()->toDateString());
+
+        $roster = Roster::whereDate('date', $selectedDate)->firstOrFail();
+        $group  = $this->determineGroupForCaregiver($roster, $userId);
+
+        if (!$group || $patient->group !== $group) {
+            abort(403, 'You are not allowed to update this patient for the selected day.');
+        }
+
+        // The six standard tasks used on patient & caregiver screens
+        $standardTasks = [
+            DailyTask::TASK_MORNING_MEDICINE,
+            DailyTask::TASK_AFTERNOON_MEDICINE,
+            DailyTask::TASK_NIGHT_MEDICINE,
+            DailyTask::TASK_BREAKFAST,
+            DailyTask::TASK_LUNCH,
+            DailyTask::TASK_DINNER,
+        ];
+
+        foreach ($standardTasks as $taskType) {
+            $checked = $request->boolean($taskType);
+
+            $task = DailyTask::firstOrNew([
+                'patient_id' => $patient->id,
+                'task_date'  => $selectedDate,
+                'task_type'  => $taskType,
+            ]);
+
+            $task->roster_id = $roster->id;
+            $task->task_name = $task->task_name ?: ucfirst(str_replace('_', ' ', $taskType));
+            $task->completed = $checked;
+            $task->completed_at = $checked ? now() : null;
+
+            $task->save();
+        }
+
+        return redirect()
+            ->route('caregiver.patient.show', [
+                'patient' => $patient->id,
+                'date'    => $selectedDate,
+            ])
+            ->with('success', 'Tasks updated successfully.');
+    }
+
+    /**
+     * Map caregiver user ID to group letter (A/B/C/D) for a given roster row.
+     */
+    private function determineGroupForCaregiver(Roster $roster, int $caregiverUserId): ?string
+    {
+        if ((int) $roster->caregiver_1 === $caregiverUserId) {
+            return 'A';
+        }
+        if ((int) $roster->caregiver_2 === $caregiverUserId) {
+            return 'B';
+        }
+        if ((int) $roster->caregiver_3 === $caregiverUserId) {
+            return 'C';
+        }
+        if ((int) $roster->caregiver_4 === $caregiverUserId) {
+            return 'D';
+        }
+
+        return null;
     }
 }

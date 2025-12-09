@@ -15,12 +15,14 @@ class CaregiverSeeder extends Seeder
         })->get();
 
         foreach ($caregiverUsers as $user) {
-            Caregiver::create([
-                'user_id' => $user->id,
-                'shift' => rand(0,1) ? 'Day' : 'Night',
-                'assigned_patients' => rand(2,5),
-                'performance_rating' => ['Excellent', 'Good', 'Satisfactory'][rand(0,2)],
-            ]);
+            Caregiver::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'shift'              => rand(0, 1) ? 'Day' : 'Night',
+                    'assigned_patients'  => rand(2, 5),
+                    'performance_rating' => ['Excellent', 'Good', 'Satisfactory'][rand(0, 2)],
+                ]
+            );
         }
     }
 }

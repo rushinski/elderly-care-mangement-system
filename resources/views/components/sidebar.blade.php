@@ -93,9 +93,6 @@
                 <a href="{{ route('caregiver.dashboard') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Caregiver Dashboard
                 </a>
-                <a href="{{ route('tasks.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
-                    Add Daily Task
-                </a>
                 {{-- Shared Patient Directory / Management --}}
                 <a href="{{ route('staff.patients.index') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">
