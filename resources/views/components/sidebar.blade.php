@@ -83,6 +83,9 @@
                    class="block px-3 py-2 rounded hover:bg-gray-100">
                     Patient Directory
                 </a>
+                    <a href="{{ route('rosters.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
+                    View Roster
+                </a>
 
 
             {{-- ================= Caregiver ================= --}}
@@ -98,6 +101,9 @@
                    class="block px-3 py-2 rounded hover:bg-gray-100">
                     Patient Directory
                 </a>
+                    <a href="{{ route('rosters.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
+                    View Roster
+                </a>
 
 
             {{-- ================= Patient ================= --}}
@@ -105,12 +111,18 @@
                 <a href="{{ route('patient.dashboard') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     My Dashboard
                 </a>
+                    <a href="{{ route('rosters.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
+                    View Roster
+                </a>
 
 
             {{-- ================= Family ================= --}}
             @elseif($role === 'Family')
                 <a href="{{ route('family.dashboard') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Family Dashboard
+                </a>
+                <a href="{{ route('rosters.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
+                    View Roster
                 </a>
             @endif
         @endauth
