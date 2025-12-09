@@ -14,6 +14,8 @@ use App\Http\Controllers\UserApplicationController;
 use App\Http\Controllers\StaffPatientController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RosterController;
+use App\Http\Controllers\StaffAppointmentController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -82,7 +84,6 @@ Route::post('/admin/employees/update-salary', [AdminController::class, 'updateSa
 Route::middleware(['auth', 'role:Supervisor'])->group(function () {
     // Dashboard & Rosters
     Route::get('/supervisor/dashboard', [SupervisorController::class, 'index'])->name('supervisor.dashboard');
-    Route::resource('/supervisor/rosters', SupervisorController::class)->except(['index']);
 
     // Shared Admin Pages (Read-only / Controlled Access)
     Route::get('/supervisor/employees', [SupervisorController::class, 'employees'])->name('supervisor.employees');
@@ -183,4 +184,38 @@ Route::middleware(['auth', 'role:Admin,Supervisor'])->group(function () {
     Route::post('/admin/applications/{application}/reject', [UserApplicationController::class, 'reject'])
         ->name('applications.reject');
 });
+
+// ========================
+// Admin + Supervisor: Appointment creation
+// ========================
+Route::middleware(['auth', 'role:Admin,Supervisor'])->group(function () {
+    Route::get('/staff/appointments/create', [StaffAppointmentController::class, 'create'])
+        ->name('staff.appointments.create');
+
+    Route::post('/staff/appointments', [StaffAppointmentController::class, 'store'])
+        ->name('staff.appointments.store');
+
+    // AJAX endpoints
+    Route::get('/staff/appointments/patient/{patient}', [StaffAppointmentController::class, 'findPatient'])
+        ->name('staff.appointments.patientLookup');
+
+    Route::get('/staff/appointments/doctors-by-date', [StaffAppointmentController::class, 'doctorsByDate'])
+        ->name('staff.appointments.doctorsByDate');
+});
+
+// All roles can see the roster list
+Route::middleware(['auth'])->group(function () {
+    Route::get('/rosters', [RosterController::class, 'index'])->name('rosters.index');
+});
+
+// Admin + Supervisor can manage rosters
+Route::middleware(['auth', 'role:Admin,Supervisor'])->group(function () {
+    Route::get('/rosters/create', [RosterController::class, 'create'])->name('rosters.create');
+    Route::post('/rosters', [RosterController::class, 'store'])->name('rosters.store');
+
+    Route::get('/rosters/{roster}/edit', [RosterController::class, 'edit'])->name('rosters.edit');
+    Route::put('/rosters/{roster}', [RosterController::class, 'update'])->name('rosters.update');
+    Route::delete('/rosters/{roster}', [RosterController::class, 'destroy'])->name('rosters.destroy');
+});
+
 

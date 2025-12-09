@@ -19,7 +19,6 @@
                 class="block px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.employees.*') ? 'bg-gray-100 font-semibold' : '' }}">
                     Employees
                 </a>
-
                 <a href="{{ route('applications.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     View Applications
                 </a>
@@ -30,30 +29,28 @@
                 <a href="{{ route('admin.reports') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Reports
                 </a>
-                <a href="{{ route('payments.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
-                    Payments
-                </a>
-                <a href="{{ route('payments.summary') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
-                    Payment Summary
-                </a>
-
                 {{-- Shared Patient Directory / Management --}}
                 <a href="{{ route('staff.patients.index') }}"
                 class="block px-3 py-2 rounded hover:bg-gray-100">
                     Patient Directory
                 </a>
-
                 <a href="{{ route('rosters.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     View Roster
                 </a>
-
+                <a href="{{ route('staff.appointments.create') }}"
+                    class="block px-3 py-2 rounded hover:bg-gray-100">
+                    Create Appointment
+                </a>
+                {{-- Supervisor-only pages --}}
+                <a href="{{ route('rosters.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
+                    Create Roster
+                </a>
 
             {{-- ================= Supervisor ================= --}}
             @elseif($role === 'Supervisor')
                 <a href="{{ route('supervisor.dashboard') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Supervisor Dashboard
                 </a>
-
                 {{-- Shared admin pages in readonly mode --}}
                 <a href="{{ route('supervisor.employees') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Employees
@@ -64,7 +61,6 @@
                 <a href="{{ route('supervisor.reports') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Reports
                 </a>
-
                 {{-- Supervisor-only pages --}}
                 <a href="{{ route('rosters.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Create Roster
@@ -74,18 +70,21 @@
                    class="block px-3 py-2 rounded hover:bg-gray-100">
                     Patient Directory
                 </a>
-
+                    <a href="{{ route('applications.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
+                    View Applications
+                </a>
                 <a href="{{ route('rosters.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     View Roster
+                </a>
+                <a href="{{ route('staff.appointments.create') }}"
+                    class="block px-3 py-2 rounded hover:bg-gray-100">
+                        Create Appointment
                 </a>
 
             {{-- ================= Doctor ================= --}}
             @elseif($role === 'Doctor')
                 <a href="{{ route('doctor.dashboard') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Doctor Dashboard
-                </a>
-                <a href="{{ route('appointments.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
-                    Create Appointment
                 </a>
                 {{-- Shared Patient Directory / Management --}}
                 <a href="{{ route('staff.patients.index') }}"

@@ -15,7 +15,7 @@
             <form method="GET" action="{{ route('staff.patients.index') }}" class="flex flex-col md:flex-row gap-3 mb-4">
                 <div class="flex-1">
                     <label class="block text-xs font-semibold text-gray-600 mb-1" for="info_name">
-                        Patient Name
+                        Patient ID
                     </label>
                     <input
                         type="text"
@@ -23,7 +23,7 @@
                         name="info_name"
                         value="{{ old('info_name', $infoNameSearch) }}"
                         class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-400"
-                        placeholder="Enter patient name"
+                        placeholder="Enter patient ID"
                     >
                 </div>
 

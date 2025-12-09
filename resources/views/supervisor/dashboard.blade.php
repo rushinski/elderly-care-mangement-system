@@ -50,20 +50,6 @@
                             <td class="py-2 px-2">{{ $roster->caregiver4->name ?? 'N/A' }}</td>
                             <td class="py-2 px-2">{{ \Carbon\Carbon::parse($roster->date)->format('Y-m-d') }}</td>
                             <td class="py-2 px-2 text-right whitespace-nowrap">
-                                <a href="{{ route('rosters.edit', $roster) }}"
-                                   class="text-xs text-blue-600 hover:underline mr-2">
-                                    Edit
-                                </a>
-                                <form method="POST" action="{{ route('rosters.destroy', $roster) }}" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                            class="text-xs text-red-600 hover:underline"
-                                            onclick="return confirm('Delete roster entry?')">
-                                        Delete
-                                    </button>
-                                </form>
-                            </td>
                         </tr>
                     @empty
                         <tr>

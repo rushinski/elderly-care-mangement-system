@@ -13,7 +13,7 @@ class StaffPatientController extends Controller
      * Unified patient management + directory page.
      *
      * - Top section (Admin + Supervisor only):
-     *   * Search by patient name.
+     *   * Search by patient ID.
      *   * Show ID, Group, Admission Date.
      *   * Group + Admission Date editable.
      *
@@ -31,22 +31,32 @@ class StaffPatientController extends Controller
 
         // ==================================
         // TOP: "Additional Info" search
-        // Only for Admin + Supervisor
+        // Now searched by PATIENT ID
         // ==================================
         $infoNameSearch = null;
         $selectedPatient = null;
 
         if ($canEdit) {
+            // still reading from 'info_name' input for compatibility with your existing form
             $infoNameSearch = trim((string) $request->input('info_name'));
 
             if ($infoNameSearch !== '') {
-                $selectedPatient = Patient::with('user')
-                    ->whereHas('user', function ($q) use ($infoNameSearch) {
-                        $q->where('first_name', 'like', "%{$infoNameSearch}%")
-                            ->orWhere('last_name', 'like', "%{$infoNameSearch}%")
-                            ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$infoNameSearch}%"]);
-                    })
-                    ->first();
+                $query = Patient::with('user');
+
+                if (is_numeric($infoNameSearch)) {
+                    // Exact ID match
+                    $selectedPatient = $query
+                        ->where('id', (int) $infoNameSearch)
+                        ->first();
+                } else {
+                    // Optional: if you want to allow "fuzzy" ID search:
+                    // $selectedPatient = $query
+                    //     ->where('id', 'like', "%{$infoNameSearch}%")
+                    //     ->first();
+
+                    // For now, non-numeric input returns no match
+                    $selectedPatient = null;
+                }
             }
         }
 
@@ -161,7 +171,8 @@ class StaffPatientController extends Controller
 
         return redirect()
             ->route('staff.patients.index', [
-                'info_name' => optional($patient->user)->full_name,
+                // After save, repopulate the Additional Info search using the patient ID
+                'info_name' => $patient->id,
             ])
             ->with('success', 'Patient information updated successfully.');
     }
