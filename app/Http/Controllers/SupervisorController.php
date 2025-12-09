@@ -15,7 +15,10 @@ class SupervisorController extends Controller
     public function index()
     {
         $rosters = Roster::with(['user', 'caregiver', 'supervisor'])->latest()->get();
-        $reports = \App\Models\Report::orderBy('created_at', 'desc')->get();
+        $reports = \App\Models\Report::where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
 
 
         return view('supervisor.dashboard', compact('rosters', 'reports'));
@@ -118,10 +121,12 @@ class SupervisorController extends Controller
             'status' => 'required|in:approved,rejected',
         ]);
 
-        $report->update($validated);
+        $report->status = $validated['status'];
+        $report->save();
 
         return redirect()
             ->route('supervisor.dashboard')
             ->with('success', 'Report status updated.');
     }
+
 }

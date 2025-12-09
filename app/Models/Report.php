@@ -17,7 +17,9 @@ class Report extends Model
         'completed_tasks',
         'total_tasks',
         'summary',
+        'status',
     ];
+
 
     // Relationships
     public function patient()
