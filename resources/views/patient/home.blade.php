@@ -91,11 +91,11 @@
                 {{-- Doctor's Appointment --}}
                 <td class="py-3 px-2 align-middle">
                     @if($appointment)
-                        {{-- adjust to your actual time column --}}
-                        {{ $appointment->appointment_date?->format('Y-m-d H:i') ?? 'Scheduled' }}
+                        {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('Y-m-d H:i') }}
                     @else
                         <span class="text-gray-500 italic">No appointment for this day</span>
                     @endif
+
                 </td>
 
                 {{-- Caregiver's Name --}}
