@@ -9,29 +9,58 @@ class Roster extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     */
     protected $fillable = [
         'supervisor_id',
-        'caregiver_id',
+        'doctor_id',
+        'caregiver_1',
+        'caregiver_2',
+        'caregiver_3',
+        'caregiver_4',
         'date',
-        'shift',
-        'notes'
     ];
 
+    /**
+     * Relationships
+     */
     public function supervisor()
     {
         return $this->belongsTo(User::class, 'supervisor_id');
     }
 
-    public function caregiver()
+    public function doctor()
     {
-        return $this->belongsTo(User::class, 'caregiver_id');
+        return $this->belongsTo(User::class, 'doctor_id');
     }
 
-    // ✅ Add this:
+    public function caregiver1()
+    {
+        return $this->belongsTo(User::class, 'caregiver_1');
+    }
+
+    public function caregiver2()
+    {
+        return $this->belongsTo(User::class, 'caregiver_2');
+    }
+
+    public function caregiver3()
+    {
+        return $this->belongsTo(User::class, 'caregiver_3');
+    }
+
+    public function caregiver4()
+    {
+        return $this->belongsTo(User::class, 'caregiver_4');
+    }
+
+    /**
+     * Backward compatibility for any legacy code 
+     * that references $roster->user (assumes caregiver_1 as primary staff link)
+     */
     public function user()
     {
-        // Fallback relationship for older code referencing `$roster->user`
-        // It links to caregiver by default.
-        return $this->belongsTo(User::class, 'caregiver_id');
+        return $this->belongsTo(User::class, 'caregiver_1');
     }
 }

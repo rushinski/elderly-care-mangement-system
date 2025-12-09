@@ -21,6 +21,30 @@ class AdminController extends Controller
 
         return view('admin.dashboard', compact('users', 'reports', 'payments'));
     }
+    /**
+     * Display the employee list for Supervisor (read-only).
+     */
+    public function indexSupervisor()
+    {
+        // Only allow access to supervisors
+        if (auth()->user()->role->name !== 'Supervisor') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Retrieve all employees (users except Admins)
+        $employees = \App\Models\User::with('role')
+            ->whereHas('role', function ($q) {
+                $q->whereIn('name', ['Doctor', 'Nurse', 'Caregiver', 'Supervisor']);
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        // Reuse the same view (read-only)
+        return view('admin.employees.index', [
+            'employees' => $employees,
+            'readonly' => true, // flag to control Blade conditions
+        ]);
+    }
 
     /**
      * Display form for creating a new user.

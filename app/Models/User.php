@@ -35,6 +35,14 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
+    public function getNameAttribute()
+    {
+        if ($this->first_name || $this->last_name) {
+            return trim("{$this->first_name} {$this->last_name}");
+        }
+
+        return $this->email; // fallback
+    }
 
     public function patient()
     {
