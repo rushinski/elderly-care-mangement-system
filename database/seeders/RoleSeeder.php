@@ -10,16 +10,19 @@ class RoleSeeder extends Seeder
     public function run(): void
     {
         $roles = [
-            ['name' => 'Admin', 'description' => 'System administrator'],
-            ['name' => 'Supervisor', 'description' => 'Supervises caregivers and staff'],
-            ['name' => 'Doctor', 'description' => 'Manages appointments and prescriptions'],
-            ['name' => 'Caregiver', 'description' => 'Handles daily patient tasks'],
-            ['name' => 'Patient', 'description' => 'Receives care and schedules'],
-            ['name' => 'Family', 'description' => 'Read-only patient viewer'],
+            ['name' => 'Admin',      'access_level' => 0],
+            ['name' => 'Supervisor', 'access_level' => 1],
+            ['name' => 'Doctor',     'access_level' => 2],
+            ['name' => 'Caregiver',  'access_level' => 3],
+            ['name' => 'Patient',    'access_level' => 4],
+            ['name' => 'Family',     'access_level' => 5],
         ];
 
         foreach ($roles as $role) {
-            Role::create($role);
+            Role::updateOrCreate(
+                ['name' => $role['name']],
+                ['access_level' => $role['access_level']]
+            );
         }
     }
 }

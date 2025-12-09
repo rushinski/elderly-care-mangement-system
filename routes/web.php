@@ -12,6 +12,7 @@ use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserApplicationController;
 use App\Http\Controllers\StaffPatientController;
+use App\Http\Controllers\RoleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,6 +48,13 @@ Route::middleware(['auth', 'role:Admin'])->group(function () {
     Route::put('/admin/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/admin/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::get('/admin/payments/summary', [PaymentController::class, 'summary'])->name('payments.summary');
+    // --- Role management routes ---
+    Route::get('/admin/roles', [RoleController::class, 'index'])->name('roles.index');
+    Route::get('/admin/roles/create', [RoleController::class, 'create'])->name('roles.create');
+    Route::post('/admin/roles', [RoleController::class, 'store'])->name('roles.store');
+    Route::get('/admin/roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
+    Route::put('/admin/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+    Route::delete('/admin/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
 });
 
 Route::middleware(['auth', 'role:Supervisor'])->group(function () {
