@@ -1,67 +1,57 @@
 <?php
+// app/Http/Controllers/PatientController.php
 
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Patient;
 use App\Models\Appointment;
-use App\Models\Prescription;
 use App\Models\Payment;
+use App\Models\Prescription;
+use App\Models\DailyTask;
+use Carbon\Carbon;
 
 class PatientController extends Controller
 {
-    /**
-     * Display the patient dashboard with appointments, prescriptions, and payments.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $userId = auth()->id();
-        $patient = Patient::where('user_id', $userId)->firstOrFail();
+        $user = auth()->user();
 
-        $appointments = Appointment::where('patient_id', $patient->id)->latest()->get();
-        $prescriptions = Prescription::where('patient_id', $patient->id)->latest()->get();
-        $payments = Payment::where('patient_id', $patient->id)->latest()->get();
+        // Find the Patient record linked to this logged-in user
+        $patient = Patient::with('user')
+            ->where('user_id', $user->id)
+            ->firstOrFail();
 
-        return view('patient.dashboard', compact('patient', 'appointments', 'prescriptions', 'payments'));
-    }
-
-    /**
-     * Show appointment details.
-     */
-    public function showAppointment(Appointment $appointment)
-    {
-        $this->authorizePatientAccess($appointment->patient_id);
-        return view('patient.view-appointment', compact('appointment'));
-    }
-
-    /**
-     * Show prescription details.
-     */
-    public function showPrescription(Prescription $prescription)
-    {
-        $this->authorizePatientAccess($prescription->patient_id);
-        return view('patient.view-prescription', compact('prescription'));
-    }
-
-    /**
-     * Show payment details.
-     */
-    public function showPayment(Payment $payment)
-    {
-        $this->authorizePatientAccess($payment->patient_id);
-        return view('patient.view-payment', compact('payment'));
-    }
-
-    /**
-     * Verify that the current user owns this patient record.
-     */
-    private function authorizePatientAccess($patientId)
-    {
-        $userId = auth()->id();
-        $patient = Patient::where('id', $patientId)->where('user_id', $userId)->first();
-
-        if (!$patient) {
-            abort(403, 'Unauthorized access.');
+        // Date filter: default to today, allow ?date=YYYY-MM-DD
+        $selectedDate = $request->query('date');
+        if (!$selectedDate) {
+            $selectedDate = now()->toDateString();
         }
+
+        // Appointment for that date (adjust column name to your schema)
+        $appointment = Appointment::with('doctor.user')
+            ->where('patient_id', $patient->id)
+            ->whereDate('appointment_date', $selectedDate) // <- change if your column is different
+            ->first();
+
+        // Daily tasks for that patient + date, keyed by task_type
+        $tasks = DailyTask::where('patient_id', $patient->id)
+            ->whereDate('task_date', $selectedDate)
+            ->get()
+            ->keyBy('task_type');
+
+        // If you already know how caregiver assignment works, you can fetch it here.
+        // Placeholder for now:
+        $caregiverName = 'N/A'; // TODO: wire from Roster/Caregiver relationship
+
+        return view('patient.home', [
+            'patient'       => $patient,
+            'selectedDate'  => $selectedDate,
+            'appointment'   => $appointment,
+            'tasks'         => $tasks,
+            'caregiverName' => $caregiverName,
+        ]);
     }
+
+    // ... keep your showAppointment, showPrescription, showPayment as-is
 }
