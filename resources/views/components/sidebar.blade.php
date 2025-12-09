@@ -41,10 +41,6 @@
                     class="block px-3 py-2 rounded hover:bg-gray-100">
                     Create Appointment
                 </a>
-                {{-- Supervisor-only pages --}}
-                <a href="{{ route('rosters.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
-                    Create Roster
-                </a>
 
             {{-- ================= Supervisor ================= --}}
             @elseif($role === 'Supervisor')
@@ -61,10 +57,7 @@
                 <a href="{{ route('supervisor.reports') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Reports
                 </a>
-                {{-- Supervisor-only pages --}}
-                <a href="{{ route('rosters.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
-                    Create Roster
-                </a>
+
                 {{-- Shared Patient Directory / Management --}}
                 <a href="{{ route('staff.patients.index') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">

@@ -11,17 +11,22 @@ class AppointmentSeeder extends Seeder
 {
     public function run(): void
     {
-        $doctors = Doctor::all();
+        $doctors  = Doctor::all();
         $patients = Patient::all();
+
+        if ($doctors->isEmpty() || $patients->isEmpty()) {
+            return;
+        }
+
+        $statuses = ['Scheduled', 'Completed', 'Cancelled'];
 
         foreach ($patients as $patient) {
             Appointment::create([
-                'doctor_id' => $doctors->random()->id,
-                'patient_id' => $patient->id,
-                'appointment_date' => now()->addDays(rand(1, 10)),
-                'appointment_time' => now()->addHours(rand(8, 17))->format('H:i:s'),
-                'status' => ['Scheduled', 'Completed', 'Cancelled'][rand(0, 2)],
-                'notes' => fake()->sentence(8),
+                'doctor_id'        => $doctors->random()->id,              // doctors.id
+                'patient_id'       => $patient->id,                         // patients.id
+                'appointment_date' => now()->addDays(rand(-5, 10))->toDateString(),
+                'status'           => $statuses[array_rand($statuses)],
+                'notes'            => fake()->sentence(8),
             ]);
         }
     }

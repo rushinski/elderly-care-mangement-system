@@ -26,7 +26,8 @@
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-                {{-- LEFT SIDE: Patient ID, Date, Doctor --}}
+
+                {{-- LEFT SIDE --}}
                 <div class="md:col-span-2 space-y-4">
 
                     {{-- Patient ID --}}
@@ -69,22 +70,7 @@
                             class="flex-1 border rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring focus:border-blue-400"
                         >
                             <option value="">Select doctor</option>
-                            {{-- options filled by JS when date is chosen --}}
                         </select>
-                    </div>
-
-                    {{-- Time --}}
-                    <div class="flex flex-col md:flex-row md:items-center gap-3">
-                        <label for="appointment_time" class="w-32 font-semibold text-sm text-gray-700">
-                            Time
-                        </label>
-                        <input
-                            type="time"
-                            id="appointment_time"
-                            name="appointment_time"
-                            value="{{ old('appointment_time') }}"
-                            class="flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-400"
-                        >
                     </div>
 
                     {{-- Notes --}}
@@ -123,7 +109,7 @@
                     </p>
                 </div>
 
-                {{-- RIGHT SIDE: Patient Name (read-only) --}}
+                {{-- RIGHT SIDE: Patient Name --}}
                 <div class="space-y-2">
                     <label class="block font-semibold text-sm text-gray-700">
                         Patient Name
@@ -142,10 +128,8 @@
             </div>
         </form>
     </x-card>
-
 @endsection
 
-{{-- Simple inline JS – no framework needed --}}
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -165,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
         doctorSelect.appendChild(opt);
     }
 
-    // --- Patient lookup on blur of Patient ID ---
+    // Patient lookup
     patientIdInput.addEventListener('blur', function () {
         const id = this.value.trim();
         patientNameInput.value = '';
@@ -174,9 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         fetch(`${patientLookupBase}/${encodeURIComponent(id)}`)
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Not found');
-                }
+                if (!response.ok) throw new Error('Not found');
                 return response.json();
             })
             .then(data => {
@@ -187,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     });
 
-    // --- Doctors dropdown updates when date changes ---
+    // Doctors by date
     dateInput.addEventListener('change', function () {
         const date = this.value;
         resetDoctors('Loading...');
@@ -218,10 +200,9 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     });
 
-    // Trigger doctor loading if date is prefilled
+    // Preload doctors if date prefilled
     if (dateInput.value) {
-        const event = new Event('change');
-        dateInput.dispatchEvent(event);
+        dateInput.dispatchEvent(new Event('change'));
     }
 });
 </script>

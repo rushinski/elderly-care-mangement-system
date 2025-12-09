@@ -10,10 +10,7 @@ class Doctor extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'specialization',
-        'license_number',
-        'shift',
+        'user_id', // users.id
     ];
 
     // Relationships

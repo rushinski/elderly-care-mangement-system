@@ -151,13 +151,11 @@ class UserSeeder extends Seeder
         Patient::firstOrCreate(
             ['user_id' => $basePatientUser->id],
             [
-                'patient_code'               => 'PC-' . strtoupper(Str::random(6)),
                 'family_code'                => 'FC-' . strtoupper(Str::random(6)),
                 'emergency_contact'          => $faker->name(),
                 'emergency_contact_relation' => 'Spouse',
                 'admission_date'             => now()->subMonths(3),
                 'group'                      => 'A', // baseline A
-                'medical_history'            => 'Hypertension, regular checkups.',
             ]
         );
 
@@ -187,13 +185,11 @@ class UserSeeder extends Seeder
             Patient::updateOrCreate(
                 ['user_id' => $patientUser->id],
                 [
-                    'patient_code'               => 'PC-' . strtoupper(Str::random(6)),
                     'family_code'                => 'FC-' . strtoupper(Str::random(6)),
                     'emergency_contact'          => $faker->name(),
                     'emergency_contact_relation' => $faker->name(),
                     'admission_date'             => $faker->dateTimeBetween('-2 years', 'now')->format('Y-m-d'),
                     'group'                      => $group,
-                    'medical_history'            => $faker->sentence(12),
                 ]
             );
         }
@@ -215,13 +211,11 @@ class UserSeeder extends Seeder
 
             Patient::create([
                 'user_id'                    => $patientUser->id,
-                'patient_code'               => 'PC-' . strtoupper(Str::random(6)),
                 'family_code'                => 'FC-' . strtoupper(Str::random(6)),
                 'emergency_contact'          => $faker->name(),
                 'emergency_contact_relation' => $faker->name(),
                 'admission_date'             => $faker->dateTimeBetween('-2 years', 'now')->format('Y-m-d'),
                 'group'                      => $faker->randomElement($groups),
-                'medical_history'            => $faker->sentence(12),
             ]);
         }
     }

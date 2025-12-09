@@ -12,7 +12,6 @@ class StaffAppointmentController extends Controller
 {
     /**
      * Show the "Doctor's Appointment" creation page.
-     * Optional query params: ?patient_id=&date=
      */
     public function create(Request $request)
     {
@@ -35,10 +34,9 @@ class StaffAppointmentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'patient_id'        => 'required|exists:patients,id',
-            'appointment_date'  => 'required|date',
-            'appointment_time'  => 'required',
-            'doctor_id'         => [
+            'patient_id'       => 'required|exists:patients,id',
+            'appointment_date' => 'required|date',
+            'doctor_id'        => [
                 'required',
                 'exists:doctors,id',
                 function ($attribute, $value, $fail) use ($request) {
@@ -47,7 +45,7 @@ class StaffAppointmentController extends Controller
                         return;
                     }
 
-                    // Doctor must appear on the Roster (doctor_id is USER id in roster)
+                    // The roster keeps doctor_id as USERS.id
                     $onRoster = Roster::whereDate('date', $request->appointment_date)
                         ->where('doctor_id', $doctor->user_id)
                         ->exists();
@@ -62,10 +60,9 @@ class StaffAppointmentController extends Controller
 
         Appointment::create([
             'patient_id'       => $validated['patient_id'],
-            'doctor_id'        => $validated['doctor_id'],  // Doctor::id
+            'doctor_id'        => $validated['doctor_id'],   // doctors.id
             'appointment_date' => $validated['appointment_date'],
-            'appointment_time' => $validated['appointment_time'],
-            'status'           => 'scheduled',
+            'status'           => 'Scheduled',
             'notes'            => $validated['notes'] ?? null,
         ]);
 
@@ -88,7 +85,7 @@ class StaffAppointmentController extends Controller
     }
 
     /**
-     * AJAX: return doctors on the roster for a given date.
+     * AJAX: get doctors on roster for a given date.
      */
     public function doctorsByDate(Request $request)
     {
@@ -97,7 +94,7 @@ class StaffAppointmentController extends Controller
             return response()->json([]);
         }
 
-        // doctor_id in roster is USER id
+        // Roster doctor_id => users.id
         $doctorUserIds = Roster::whereDate('date', $date)
             ->pluck('doctor_id')
             ->unique();
@@ -106,17 +103,16 @@ class StaffAppointmentController extends Controller
             return response()->json([]);
         }
 
+        // Doctors table entries whose user_id is in that list
         $doctors = Doctor::with('user')
             ->whereIn('user_id', $doctorUserIds)
             ->get();
 
         return response()->json(
-            $doctors->map(function (Doctor $doctor) {
-                return [
-                    'id'   => $doctor->id,
-                    'name' => $doctor->user?->full_name ?? 'Doctor #'.$doctor->id,
-                ];
-            })
+            $doctors->map(fn (Doctor $doctor) => [
+                'id'   => $doctor->id,                                   // doctors.id
+                'name' => $doctor->user?->full_name ?? "Doctor #{$doctor->id}",
+            ])
         );
     }
 }

@@ -12,15 +12,20 @@ class PrescriptionSeeder extends Seeder
     {
         $appointments = Appointment::all();
 
+        if ($appointments->isEmpty()) {
+            return;
+        }
+
+        $meds = ['Paracetamol', 'Ibuprofen', 'Amoxicillin', 'Metformin'];
+
         foreach ($appointments as $appointment) {
             Prescription::create([
                 'appointment_id' => $appointment->id,
-                'patient_id' => $appointment->patient_id,
-                'medicine_name' => ['Paracetamol', 'Ibuprofen', 'Amoxicillin'][rand(0, 2)],
-                'dosage' => ['500mg', '250mg', '100mg'][rand(0, 2)],
-                'frequency' => ['Once a day', 'Twice a day'][rand(0, 1)],
-                'duration_days' => rand(3, 10),
-                'instructions' => fake()->sentence(6),
+                'patient_id'     => $appointment->patient_id,
+                'comment'        => fake()->sentence(10),
+                'morning_med'    => fake()->randomElement($meds),
+                'afternoon_med'  => rand(0, 1) ? fake()->randomElement($meds) : null,
+                'night_med'      => rand(0, 1) ? fake()->randomElement($meds) : null,
             ]);
         }
     }

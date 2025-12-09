@@ -6,14 +6,12 @@ use Illuminate\Database\Seeder;
 use App\Models\DailyTask;
 use App\Models\Roster;
 use App\Models\Patient;
-use Carbon\Carbon;
 
 class DailyTaskSeeder extends Seeder
 {
     public function run(): void
     {
-        $date = now()->toDateString();
-
+        $date     = now()->toDateString();
         $roster   = Roster::whereDate('date', $date)->first();
         $patients = Patient::all();
 
@@ -21,7 +19,6 @@ class DailyTaskSeeder extends Seeder
             return;
         }
 
-        // Map of task_type => human label
         $taskMap = [
             DailyTask::TASK_MORNING_MEDICINE   => 'Morning Medicine',
             DailyTask::TASK_AFTERNOON_MEDICINE => 'Afternoon Medicine',
@@ -41,12 +38,8 @@ class DailyTaskSeeder extends Seeder
                         'task_type'  => $type,
                     ],
                     [
-                        'task_name'    => $label,
-                        'completed'    => (bool) rand(0, 1),
-                        'completed_at' => rand(0, 1)
-                            ? Carbon::now()->subHours(rand(1, 8))
-                            : null,
-                        'remarks'      => '',
+                        'task_name' => $label,
+                        'completed' => (bool) rand(0, 1),
                     ]
                 );
             }
