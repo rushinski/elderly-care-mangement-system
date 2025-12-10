@@ -102,40 +102,7 @@ class SupervisorController extends Controller
         return view('supervisor.create-roster', compact('supervisors', 'doctors', 'caregivers'));
     }
 
-    /**
-     * Store a new roster record.
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'supervisor_id' => 'required|exists:users,id',
-            'doctor_id' => 'required|exists:users,id',
-            'caregiver_1' => 'nullable|exists:users,id',
-            'caregiver_2' => 'nullable|exists:users,id',
-            'caregiver_3' => 'nullable|exists:users,id',
-            'caregiver_4' => 'nullable|exists:users,id',
-            'date' => 'required|date',
-        ]);
-
-        // ✅ Prevent duplicate caregivers
-        $caregivers = [
-            $request->caregiver_1,
-            $request->caregiver_2,
-            $request->caregiver_3,
-            $request->caregiver_4,
-        ];
-
-        $filtered = array_filter($caregivers);
-        if (count($filtered) !== count(array_unique($filtered))) {
-            return back()->withErrors(['caregivers' => 'Each caregiver must be unique.'])->withInput();
-        }
-
-        Roster::create($validated);
-
-        return redirect()
-            ->route('supervisor.dashboard')
-            ->with('success', 'Roster created successfully.');
-    }
+    
 
     /**
      * Show a specific roster entry in full detail.
@@ -158,32 +125,66 @@ class SupervisorController extends Controller
         return view('supervisor.edit-roster', compact('roster', 'supervisors', 'doctors', 'caregivers'));
     }
 
-    /**
-     * Update an existing roster record.
-     */
-    public function update(Request $request, Roster $roster)
+        // Store a new roster record.
+    public function store(Request $request)
     {
         $validated = $request->validate([
-            'supervisor_id' => 'required|exists:users,id',
-            'doctor_id' => 'required|exists:users,id',
-            'caregiver_1' => 'nullable|exists:users,id',
-            'caregiver_2' => 'nullable|exists:users,id',
-            'caregiver_3' => 'nullable|exists:users,id',
-            'caregiver_4' => 'nullable|exists:users,id',
-            'date' => 'required|date',
+            'supervisor_id'   => 'required|exists:users,id',
+            'doctor_id'       => 'required|exists:users,id',
+            'caregiver_1_id'  => 'nullable|exists:users,id',
+            'caregiver_2_id'  => 'nullable|exists:users,id',
+            'caregiver_3_id'  => 'nullable|exists:users,id',
+            'caregiver_4_id'  => 'nullable|exists:users,id',
+            'date'            => 'required|date',
         ]);
 
-        // ✅ Prevent duplicate caregivers
+        // Prevent duplicate caregivers
         $caregivers = [
-            $request->caregiver_1,
-            $request->caregiver_2,
-            $request->caregiver_3,
-            $request->caregiver_4,
+            $request->input('caregiver_1_id'),
+            $request->input('caregiver_2_id'),
+            $request->input('caregiver_3_id'),
+            $request->input('caregiver_4_id'),
         ];
 
         $filtered = array_filter($caregivers);
         if (count($filtered) !== count(array_unique($filtered))) {
-            return back()->withErrors(['caregivers' => 'Each caregiver must be unique.'])->withInput();
+            return back()
+                ->withErrors(['caregivers' => 'Each caregiver must be unique.'])
+                ->withInput();
+        }
+
+        Roster::create($validated);
+
+        return redirect()
+            ->route('supervisor.dashboard')
+            ->with('success', 'Roster created successfully.');
+    }
+
+    // Update an existing roster record.
+    public function update(Request $request, Roster $roster)
+    {
+        $validated = $request->validate([
+            'supervisor_id'   => 'required|exists:users,id',
+            'doctor_id'       => 'required|exists:users,id',
+            'caregiver_1_id'  => 'nullable|exists:users,id',
+            'caregiver_2_id'  => 'nullable|exists:users,id',
+            'caregiver_3_id'  => 'nullable|exists:users,id',
+            'caregiver_4_id'  => 'nullable|exists:users,id',
+            'date'            => 'required|date',
+        ]);
+
+        $caregivers = [
+            $request->input('caregiver_1_id'),
+            $request->input('caregiver_2_id'),
+            $request->input('caregiver_3_id'),
+            $request->input('caregiver_4_id'),
+        ];
+
+        $filtered = array_filter($caregivers);
+        if (count($filtered) !== count(array_unique($filtered))) {
+            return back()
+                ->withErrors(['caregivers' => 'Each caregiver must be unique.'])
+                ->withInput();
         }
 
         $roster->update($validated);
@@ -192,6 +193,7 @@ class SupervisorController extends Controller
             ->route('supervisor.dashboard')
             ->with('success', 'Roster updated successfully.');
     }
+
 
     /**
      * Delete a roster record.

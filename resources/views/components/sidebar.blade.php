@@ -26,9 +26,7 @@
                     class="block px-3 py-2 rounded hover:bg-gray-100">
                     Manage Roles
                 </a>
-                <a href="{{ route('admin.reports') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
-                    Reports
-                </a>
+                
                 <a href="{{ route('admin.missedActivity') }}"
                 class="block px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.missedActivity') ? 'bg-gray-100 font-semibold' : '' }}">
                     Missed Patient Activity
@@ -58,12 +56,7 @@
                 <a href="{{ route('supervisor.employees') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Employees
                 </a>
-                <a href="{{ route('supervisor.appointments') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
-                    Appointments
-                </a>
-                <a href="{{ route('supervisor.reports') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
-                    Reports
-                </a>
+                
                 <a href="{{ route('supervisor.missedActivity') }}"
                 class="block px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('supervisor.missedActivity') ? 'bg-gray-100 font-semibold' : '' }}">
                     Missed Patient Activity

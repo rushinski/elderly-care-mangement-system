@@ -115,7 +115,7 @@ class CaregiverController extends Controller
             $task->roster_id = $roster->id;
             $task->task_name = $task->task_name ?: ucfirst(str_replace('_', ' ', $taskType));
             $task->completed = $checked;
-            $task->completed_at = $checked ? now() : null;
+
 
             $task->save();
         }
@@ -133,19 +133,21 @@ class CaregiverController extends Controller
      */
     private function determineGroupForCaregiver(Roster $roster, int $caregiverUserId): ?string
     {
-        if ((int) $roster->caregiver_1 === $caregiverUserId) {
+        if ((int) $roster->caregiver_1_id === $caregiverUserId) {
             return 'A';
         }
-        if ((int) $roster->caregiver_2 === $caregiverUserId) {
+        if ((int) $roster->caregiver_2_id === $caregiverUserId) {
             return 'B';
         }
-        if ((int) $roster->caregiver_3 === $caregiverUserId) {
+        if ((int) $roster->caregiver_3_id === $caregiverUserId) {
             return 'C';
         }
-        if ((int) $roster->caregiver_4 === $caregiverUserId) {
+        if ((int) $roster->caregiver_4_id === $caregiverUserId) {
             return 'D';
         }
 
         return null;
     }
+
+
 }

@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::table('rosters', function (Blueprint $table) {
             if (Schema::hasColumn('rosters', 'caregiver_1')) {
-                $table->renameColumn('caregiver_1', 'caregiver_1_id');
+                $table->renameColumn('caregiver_1', 'caregiver_1');
             }
             if (Schema::hasColumn('rosters', 'caregiver_2')) {
                 $table->renameColumn('caregiver_2', 'caregiver_2_id');
@@ -26,8 +26,8 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('rosters', function (Blueprint $table) {
-            if (Schema::hasColumn('rosters', 'caregiver_1_id')) {
-                $table->renameColumn('caregiver_1_id', 'caregiver_1');
+            if (Schema::hasColumn('rosters', 'caregiver_1')) {
+                $table->renameColumn('caregiver_1', 'caregiver_1');
             }
             if (Schema::hasColumn('rosters', 'caregiver_2_id')) {
                 $table->renameColumn('caregiver_2_id', 'caregiver_2');

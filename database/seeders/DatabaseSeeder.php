@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             DailyTaskSeeder::class,
             PaymentSeeder::class,
             ReportSeeder::class,
+            TestDoctorFlowsSeeder::class,
         ]);
     }
 

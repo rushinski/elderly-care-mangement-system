@@ -62,35 +62,35 @@ class AdminReportController extends Controller
             $tasks = DailyTask::where('patient_id', $patient->id)
                 ->whereDate('task_date', $date)
                 ->get()
-                ->keyBy('task_name');
+                ->keyBy('task_type');
 
             // Return:
             // - "Missing" if no task row exists
             // - "Yes"     if completed == 1
             // - "No"      if completed == 0
-            $taskValue = function (string $key) use ($tasks) {
-                if (!isset($tasks[$key])) {
+            $taskValue = function (string $type) use ($tasks) {
+                if (!isset($tasks[$type])) {
                     return 'Missing';
                 }
 
-                return $tasks[$key]->completed ? 'Yes' : 'No';
+                return $tasks[$type]->completed ? 'Yes' : 'No';
             };
-
 
             // Build result row
             $results[] = [
-                'patient_name'         => $patient->user?->full_name ?? '-',
-                'doctor_name'          => optional($appointment?->doctor?->user)->full_name ?? '-',
-                'doctor_appointment'   => $appointment ? 'Yes' : 'No',
-                'caregiver_name'       => $caregiverName,
+                'patient_name'       => $patient->user?->full_name ?? '-',
+                'doctor_name'        => optional($appointment?->doctor?->user)->full_name ?? '-',
+                'doctor_appointment' => $appointment ? 'Yes' : 'No',
+                'caregiver_name'     => $caregiverName,
 
-                'morning_medicine'     => $taskValue('morning_medicine'),
-                'afternoon_medicine'   => $taskValue('afternoon_medicine'),
-                'night_medicine'       => $taskValue('night_medicine'),
-                'breakfast'            => $taskValue('breakfast'),
-                'lunch'                => $taskValue('lunch'),
-                'dinner'               => $taskValue('dinner'),
+                'morning_medicine'   => $taskValue(DailyTask::TASK_MORNING_MEDICINE),
+                'afternoon_medicine' => $taskValue(DailyTask::TASK_AFTERNOON_MEDICINE),
+                'night_medicine'     => $taskValue(DailyTask::TASK_NIGHT_MEDICINE),
+                'breakfast'          => $taskValue(DailyTask::TASK_BREAKFAST),
+                'lunch'              => $taskValue(DailyTask::TASK_LUNCH),
+                'dinner'             => $taskValue(DailyTask::TASK_DINNER),
             ];
+
         }
 
         return view('admin.missed-activity', compact('results', 'date'));

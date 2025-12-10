@@ -13,10 +13,10 @@ class Roster extends Model
     protected $fillable = [
         'supervisor_id',   // users.id
         'doctor_id',       // users.id
-        'caregiver_1',
-        'caregiver_2',
-        'caregiver_3',
-        'caregiver_4',
+        'caregiver_1_id',  // users.id
+        'caregiver_2_id',  // users.id
+        'caregiver_3_id',  // users.id
+        'caregiver_4_id',  // users.id
         'date',
     ];
 
@@ -34,31 +34,26 @@ class Roster extends Model
     {
         return $this->belongsTo(User::class, 'doctor_id');
     }
-    public function caregiver()
-    {
-        return $this->belongsTo(Caregiver::class);
-    }
 
     public function caregiver1()
     {
-        return $this->belongsTo(User::class, 'caregiver_1');
+        return $this->belongsTo(User::class, 'caregiver_1_id');
     }
 
     public function caregiver2()
     {
-        return $this->belongsTo(User::class, 'caregiver_2');
+        return $this->belongsTo(User::class, 'caregiver_2_id');
     }
 
     public function caregiver3()
     {
-        return $this->belongsTo(User::class, 'caregiver_3');
+        return $this->belongsTo(User::class, 'caregiver_3_id');
     }
 
     public function caregiver4()
     {
-        return $this->belongsTo(User::class, 'caregiver_4');
+        return $this->belongsTo(User::class, 'caregiver_4_id');
     }
-
 
     // Legacy alias so old code using $roster->user still works
     public function user()

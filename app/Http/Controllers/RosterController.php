@@ -32,9 +32,17 @@ class RosterController extends Controller
         return view('rosters.create', compact('supervisors', 'doctors', 'caregivers'));
     }
 
-    /**
-     * Store a new roster entry.
-     */
+
+
+    public function edit(Roster $roster)
+    {
+        $supervisors = User::whereHas('role', fn($q) => $q->where('name', 'Supervisor'))->get();
+        $doctors     = User::whereHas('role', fn($q) => $q->where('name', 'Doctor'))->get();
+        $caregivers  = User::whereHas('role', fn($q) => $q->where('name', 'Caregiver'))->get();
+
+        return view('rosters.edit', compact('roster', 'supervisors', 'doctors', 'caregivers'));
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -51,15 +59,6 @@ class RosterController extends Controller
 
         return redirect()->route('rosters.index')
             ->with('success', 'Roster created successfully.');
-    }
-
-    public function edit(Roster $roster)
-    {
-        $supervisors = User::whereHas('role', fn($q) => $q->where('name', 'Supervisor'))->get();
-        $doctors     = User::whereHas('role', fn($q) => $q->where('name', 'Doctor'))->get();
-        $caregivers  = User::whereHas('role', fn($q) => $q->where('name', 'Caregiver'))->get();
-
-        return view('rosters.edit', compact('roster', 'supervisors', 'doctors', 'caregivers'));
     }
 
     public function update(Request $request, Roster $roster)
@@ -79,6 +78,7 @@ class RosterController extends Controller
         return redirect()->route('rosters.index')
             ->with('success', 'Roster updated successfully.');
     }
+
 
     public function destroy(Roster $roster)
     {

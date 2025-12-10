@@ -29,7 +29,7 @@
 <x-card title="Users">
     <div class="flex justify-between items-center mb-3">
         <span class="text-sm text-gray-600">All registered users and roles</span>
-        <a href="{{ route('users.create') }}"
+        <a href=""
            class="px-3 py-1 rounded bg-blue-600 text-white text-xs hover:bg-blue-700">
             + Create User
         </a>
@@ -51,7 +51,7 @@
                 <td>{{ $user->email }}</td>
                 <td>{{ $user->role->name ?? '-' }}</td>
                 <td class="text-right">
-                    <a href="{{ route('users.show', $user) }}"
+                    <a href=""
                        class="text-xs text-blue-600 hover:underline">
                         View
                     </a>
@@ -96,7 +96,7 @@
         </table>
 
         <div class="mt-3 text-right">
-            <a href="{{ route('admin.reports') }}"
+            <a href=""
                class="text-xs text-blue-600 hover:underline">
                 View all reports
             </a>
