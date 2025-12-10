@@ -46,6 +46,11 @@
                     class="block px-3 py-2 rounded hover:bg-gray-100">
                     Create Appointment
                 </a>
+                <a href="{{ route('payments.index') }}"
+                class="block px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('payments.*') ? 'bg-gray-100 font-semibold' : '' }}">
+                    Payment
+                </a>
+
 
             {{-- ================= Supervisor ================= --}}
             @elseif($role === 'Supervisor')

@@ -21,20 +21,12 @@ class Payment extends Model
         'payment_date',
     ];
 
-    // Relationships
+    protected $casts = [
+        'payment_date' => 'date',
+    ];
+
     public function patient()
     {
         return $this->belongsTo(Patient::class);
-    }
-
-    // Auto-calculate total on save
-    protected static function booted()
-    {
-        static::saving(function ($payment) {
-            $payment->total_amount = 
-                ($payment->days * $payment->daily_rate) +
-                ($payment->appointments * $payment->appointment_rate) +
-                $payment->medicine_rate;
-        });
     }
 }
