@@ -14,7 +14,7 @@
                     Admin Dashboard
                 </a>
 
-                {{-- ✅ New Employees Tab --}}
+                {{--   New Employees Tab --}}
                 <a href="{{ route('admin.employees.index') }}"
                 class="block px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.employees.*') ? 'bg-gray-100 font-semibold' : '' }}">
                     Employees

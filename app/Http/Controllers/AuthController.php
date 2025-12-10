@@ -41,7 +41,7 @@ class AuthController extends Controller
             $user = Auth::user();
             $role = $user->role->name ?? 'Unknown';
 
-            Log::info('✅ Auth success', [
+            Log::info('  Auth success', [
                 'user_id' => $user->id,
                 'email' => $user->email,
                 'role' => $role,
@@ -65,7 +65,7 @@ class AuthController extends Controller
             return redirect($redirectPath);
         }
 
-        Log::warning('❌ Auth failed', [
+        Log::warning('  Auth failed', [
             'email' => $request->input('email'),
             'ip' => $request->ip(),
         ]);
@@ -101,7 +101,7 @@ class AuthController extends Controller
             'address'      => 'nullable|string|max:255',
             'password'     => 'required|string|min:6|confirmed',
             'role_id'      => 'required|exists:roles,id',
-            // ✅ DOB now required for **all** users
+            //   DOB now required for **all** users
             'date_of_birth'=> 'required|date',
         ];
 
@@ -142,13 +142,13 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         $email = $user ? $user->email : 'guest';
-        Log::info('🚪 Logout initiated', ['email' => $email]);
+        Log::info(' Logout initiated', ['email' => $email]);
 
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        Log::info('✅ Logout complete', ['email' => $email]);
+        Log::info('  Logout complete', ['email' => $email]);
         return redirect('/')->with('success', 'You have been logged out successfully.');
     }
 }

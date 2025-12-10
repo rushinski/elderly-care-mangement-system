@@ -161,19 +161,19 @@ class DoctorController extends Controller
         $doctorId = auth()->user()->doctor->id ?? null;
         $today = Carbon::today();
 
-        // ✅ Get the most recent appointment for today or earlier
+        //   Get the most recent appointment for today or earlier
         $latestAppointment = Appointment::where('doctor_id', $doctorId)
             ->where('patient_id', $patient->id)
             ->whereDate('appointment_date', '<=', $today)
             ->orderByDesc('appointment_date')
             ->first();
 
-        // ✅ Get all prescriptions for this patient
+        //   Get all prescriptions for this patient
         $prescriptions = Prescription::where('patient_id', $patient->id)
             ->orderByDesc('created_at')
             ->get();
 
-        // ✅ Allow new prescription only if appointment is today & not completed
+        //   Allow new prescription only if appointment is today & not completed
         $canPrescribe = $latestAppointment
             && Carbon::parse($latestAppointment->appointment_date)->isSameDay($today)
             && $latestAppointment->status !== 'Completed';

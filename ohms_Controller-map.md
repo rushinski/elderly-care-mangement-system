@@ -167,7 +167,7 @@ $request->validate([
 
 ---
 
-# ✅ Summary
+#   Summary
 
 The backend now provides:
 
