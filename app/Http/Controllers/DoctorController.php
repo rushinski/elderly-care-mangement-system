@@ -13,12 +13,57 @@ class DoctorController extends Controller
     /**
      * Display doctor dashboard with appointments and prescriptions.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = Appointment::with('patient')->latest()->get();
-        $prescriptions = Prescription::with('patient')->latest()->get();
+        $doctorId = auth()->user()->doctor->id;
 
-        return view('doctor.dashboard', compact('appointments', 'prescriptions'));
+        // ====================================
+        // 1. Collect all patient IDs linked to this doctor
+        // ====================================
+        $patientIds = Appointment::where('doctor_id', $doctorId)
+            ->pluck('patient_id')
+            ->unique();
+
+        // ====================================
+        // 2. Latest prescription per patient
+        // ====================================
+        $latestPrescriptions = Prescription::whereIn('patient_id', $patientIds)
+            ->with(['patient.user'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('patient_id')
+            ->map(fn($group) => $group->first());
+
+        // ====================================
+        // 3. Old appointments (before today)
+        // ====================================
+        $oldAppointments = Appointment::with('patient.user')
+            ->where('doctor_id', $doctorId)
+            ->whereDate('appointment_date', '<', today())
+            ->orderByDesc('appointment_date')
+            ->get();
+
+        // ====================================
+        // 4. Upcoming appointments (today → selected till-date)
+        // ====================================
+        // Default = today; replaced if query string is provided
+        $tillDate = $request->query('till_date', today()->format('Y-m-d'));
+
+        $upcomingAppointments = Appointment::with('patient.user')
+            ->where('doctor_id', $doctorId)
+            ->whereBetween(
+                'appointment_date',
+                [today()->format('Y-m-d'), $tillDate]
+            )
+            ->orderBy('appointment_date')
+            ->get();
+
+        return view('doctor.dashboard', [
+            'latestPrescriptions' => $latestPrescriptions,
+            'oldAppointments'     => $oldAppointments,
+            'upcomingAppointments'=> $upcomingAppointments,
+            'tillDate'            => $tillDate,
+        ]);
     }
 
     /**

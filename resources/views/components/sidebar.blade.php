@@ -29,6 +29,13 @@
                 <a href="{{ route('admin.reports') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Reports
                 </a>
+                <a href="{{ route('admin.missedActivity') }}"
+                class="block px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.missedActivity') ? 'bg-gray-100 font-semibold' : '' }}">
+                    Missed Patient Activity
+                </a>
+
+
+
                 {{-- Shared Patient Directory / Management --}}
                 <a href="{{ route('staff.patients.index') }}"
                 class="block px-3 py-2 rounded hover:bg-gray-100">
@@ -57,7 +64,10 @@
                 <a href="{{ route('supervisor.reports') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
                     Reports
                 </a>
-
+                <a href="{{ route('supervisor.missedActivity') }}"
+                class="block px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('supervisor.missedActivity') ? 'bg-gray-100 font-semibold' : '' }}">
+                    Missed Patient Activity
+                </a>
                 {{-- Shared Patient Directory / Management --}}
                 <a href="{{ route('staff.patients.index') }}"
                    class="block px-3 py-2 rounded hover:bg-gray-100">

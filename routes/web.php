@@ -15,6 +15,7 @@ use App\Http\Controllers\StaffPatientController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RosterController;
 use App\Http\Controllers\StaffAppointmentController;
+use App\Http\Controllers\AdminReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,6 +67,15 @@ Route::middleware(['auth', 'role:Admin'])->group(function () {
 Route::post('/admin/employees/update-salary', [AdminController::class, 'updateSalary'])
     ->name('admin.employees.updateSalary')
     ->middleware(['auth', 'role:Admin']);
+// Admin
+Route::get('/admin/missed-activity', [AdminReportController::class, 'missedActivity'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.missedActivity');
+
+// Supervisor (shared view)
+Route::get('/supervisor/missed-activity', [AdminReportController::class, 'missedActivity'])
+    ->middleware(['auth', 'role:Supervisor'])
+    ->name('supervisor.missedActivity');
 
 // ========================
 // Supervisor Routes

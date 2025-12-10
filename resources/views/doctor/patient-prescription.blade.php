@@ -1,126 +1,143 @@
+{{-- resources/views/doctor/patient-prescription.blade.php --}}
 @extends('layouts.app')
 
+@section('title', 'Patient of Doctor')
+
 @section('content')
-<div class="container py-5" style="max-width: 1050px;">
+<div class="max-w-5xl mx-auto py-8">
 
     {{-- PAGE TITLE --}}
-    <div class="mb-4">
-        <h3 class="fw-bold mb-2">Patient Prescription Management</h3>
-        <div class="text-muted">{{ now()->format('F j, Y') }}</div>
-    </div>
+    <h1 class="text-3xl font-bold mb-6">Patient of Doctor</h1>
 
-    {{-- ALERTS --}}
-    @if(session('success'))
-        <div class="alert alert-success mb-4">{{ session('success') }}</div>
-    @elseif(session('error'))
-        <div class="alert alert-danger mb-4">{{ session('error') }}</div>
-    @endif
-
-    {{-- PATIENT INFO --}}
-    <div class="border rounded-4 p-4 shadow-sm mb-4 bg-white">
-        <h5 class="fw-semibold mb-3">Patient Information</h5>
-
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-            <div class="lh-lg">
-                <div><strong>Patient:</strong> {{ $patient->user->name }}</div>
-                <div><strong>Doctor:</strong> {{ auth()->user()->name }}</div>
-            </div>
-
-            <span class="badge bg-info text-dark px-4 py-2 fs-6 rounded-pill">Active Patient Record</span>
+    {{-- PATIENT INFO CARD --}}
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <h2 class="text-lg font-semibold mb-2">Patient Information</h2>
+        <div class="text-sm space-y-1">
+            <p><strong>Patient:</strong>
+                {{ $patient->user->first_name }} {{ $patient->user->last_name }}
+            </p>
+            <p><strong>Doctor:</strong> {{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</p>
+            <p><span class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                Active Patient Record
+            </span></p>
         </div>
     </div>
 
-    {{-- PREVIOUS PRESCRIPTIONS --}}
-    <div class="border rounded-4 p-4 shadow-sm mb-4 bg-white">
-        <h5 class="fw-semibold mb-3">Previous Prescriptions</h5>
+    {{-- ================================
+        SECTION 1 — Previous Prescriptions
+    ================================= --}}
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <h2 class="text-lg font-semibold mb-4">Previous Prescriptions</h2>
 
-        @if($prescriptions->isEmpty())
-            <div class="text-muted text-center py-2">No previous prescriptions found.</div>
-        @else
-            <div class="table-responsive">
-                <table class="table table-striped align-middle" style="min-width: 100%;">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-3" style="width: 20%;">Date</th>
-                            <th style="width: 40%;">Comment</th>
-                            <th class="text-center" style="width: 15%;">Morning</th>
-                            <th class="text-center" style="width: 15%;">Afternoon</th>
-                            <th class="text-center" style="width: 15%;">Night</th>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm border-collapse">
+                <thead class="bg-gray-100 border-b">
+                    <tr>
+                        <th class="px-4 py-2 text-left">Date</th>
+                        <th class="px-4 py-2 text-left">Comment</th>
+                        <th class="px-4 py-2 text-center">Morning Med</th>
+                        <th class="px-4 py-2 text-center">Afternoon Med</th>
+                        <th class="px-4 py-2 text-center">Night Med</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($prescriptions as $p)
+                        <tr class="border-b">
+                            <td class="px-4 py-2">{{ $p->created_at->format('Y-m-d') }}</td>
+                            <td class="px-4 py-2">{{ $p->comment ?: '—' }}</td>
+                            <td class="px-4 py-2 text-center">{{ $p->morning_med ? 'Yes' : '—' }}</td>
+                            <td class="px-4 py-2 text-center">{{ $p->afternoon_med ? 'Yes' : '—' }}</td>
+                            <td class="px-4 py-2 text-center">{{ $p->night_med ? 'Yes' : '—' }}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($prescriptions as $p)
-                            <tr>
-                                <td class="ps-3">{{ $p->created_at->format('Y-m-d') }}</td>
-                                <td>{{ $p->comment ?: '—' }}</td>
-                                <td class="text-center">{{ $p->morning_med ? '✔️' : '—' }}</td>
-                                <td class="text-center">{{ $p->afternoon_med ? '✔️' : '—' }}</td>
-                                <td class="text-center">{{ $p->night_med ? '✔️' : '—' }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
+                    @empty
+                        <tr>
+                            <td colspan="5" class="py-4 text-center text-gray-500">
+                                No previous prescriptions found.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    {{-- NEW PRESCRIPTION --}}
-    <div class="border rounded-4 p-4 shadow-sm bg-white">
-
-        <h5 class="fw-semibold mb-3">New Prescription</h5>
-
-        @if($canPrescribe && isset($latestAppointment))
-
-            <form method="POST" action="{{ route('doctor.storePrescription') }}">
-                @csrf
-
-                <div class="alert alert-info py-2 px-3 mb-4 rounded-3">
-                    Only available for today’s appointment:
-                    <strong>{{ \Carbon\Carbon::parse($latestAppointment->appointment_date)->format('F j, Y') }}</strong>
-                </div>
-
-                {{-- Notes --}}
-                <div class="mb-4">
-                    <label class="fw-semibold mb-2">Prescription Notes</label>
-                    <textarea 
-                        name="comment"
-                        class="form-control shadow-sm"
-                        rows="3"
-                        placeholder="Enter instructions or medication notes..."
-                    ></textarea>
-                </div>
-
-                {{-- Checkboxes --}}
-                <div class="row g-4 mb-4">
-                    @foreach(['Morning' => 'morning_med', 'Afternoon' => 'afternoon_med', 'Night' => 'night_med'] as $label => $name)
-                        <div class="col-md-4">
-                            <div class="border rounded-3 p-3 shadow-sm text-center">
-                                <label class="fw-semibold">
-                                    <input type="checkbox" class="form-check-input me-2" name="{{ $name }}" value="1">
-                                    {{ $label }}
-                                </label>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                {{-- Buttons --}}
-                <div class="d-flex justify-content-end gap-3">
-                    <a href="{{ route('doctor.dashboard') }}" class="btn btn-outline-secondary px-4 py-2 rounded-pill">
-                        Cancel
-                    </a>
-                    <button type="submit" class="btn btn-success px-4 py-2 rounded-pill">
-                        Save
-                    </button>
-                </div>
-            </form>
-
+    {{-- ================================
+        SECTION 2 — New Prescription Button
+    ================================= --}}
+    <div class="mb-6">
+        @if($canPrescribe)
+            <a href="#new-prescription-form"
+               class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">
+                New Prescription
+            </a>
         @else
-            <div class="alert alert-warning text-center py-3 rounded-3 fs-6">
-                New prescriptions can only be added on the appointment date.
-            </div>
+            <button class="bg-gray-400 text-white px-4 py-2 rounded text-sm cursor-not-allowed"
+                    disabled>
+                New Prescription
+            </button>
+
+            <p class="text-sm text-red-600 mt-2">
+                Only works if today is the appointment day.
+            </p>
         @endif
     </div>
+
+    {{-- ================================
+        SECTION 3 — New Prescription Form (Conditional)
+    ================================= --}}
+    @if($canPrescribe)
+    <div id="new-prescription-form" class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-semibold mb-4">New Prescription</h2>
+
+        <form method="POST" action="{{ route('doctor.storePrescription') }}" class="space-y-6">
+            @csrf
+
+            {{-- Hidden Fields --}}
+            <input type="hidden" name="patient_id" value="{{ $patient->id }}">
+            <input type="hidden" name="appointment_id" value="{{ $latestAppointment->id }}">
+
+            {{-- Comment --}}
+            <div>
+                <label class="block text-sm font-medium mb-1">Comment</label>
+                <textarea name="comment" rows="3"
+                          class="border w-full rounded px-3 py-2 text-sm"
+                          placeholder="Add notes..."></textarea>
+            </div>
+
+            {{-- Medication Checkboxes --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <label class="border rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+                    <input type="checkbox" name="morning_med" value="1" class="h-4 w-4">
+                    <span class="text-sm font-medium">Morning Med</span>
+                </label>
+
+                <label class="border rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+                    <input type="checkbox" name="afternoon_med" value="1" class="h-4 w-4">
+                    <span class="text-sm font-medium">Afternoon Med</span>
+                </label>
+
+                <label class="border rounded-lg px-4 py-3 flex items-center justify-center gap-2">
+                    <input type="checkbox" name="night_med" value="1" class="h-4 w-4">
+                    <span class="text-sm font-medium">Night Med</span>
+                </label>
+            </div>
+
+            {{-- Buttons --}}
+            <div class="flex justify-end gap-4">
+                <button type="submit"
+                        class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded text-sm">
+                    Ok
+                </button>
+
+                <a href="{{ route('doctor.dashboard') }}"
+                   class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded text-sm">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+    </div>
+    @endif
 
 </div>
 @endsection
